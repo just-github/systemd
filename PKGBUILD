@@ -8,7 +8,7 @@ pkgname=('systemd' 'libsystemd' 'systemd-resolvconf' 'systemd-sysvcompat')
 # Can be from either systemd or systemd-stable
 _commit='de7436b02badc82200dc127ff190b8155769b8e7'
 pkgver=239.0
-pkgrel=1
+pkgrel=2
 arch=('x86_64')
 url="https://www.github.com/systemd/systemd"
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
@@ -61,6 +61,17 @@ sha512sums=('SKIP'
             '209b01b044877cc986757fa4009a92ea98f480306c2530075d153203c3cd2b3afccab6aacc1453dee8857991e04270572f1700310705d7a0f4d5bed27fab8c67')
 
 _backports=(
+  # resolve
+  86b112a315464604f4b40222d8bbd912432d640c
+  a5042ec4d7840f79d49688f07bf9bae7203ac50e
+  fa6a69d7837f1d5fcd0ba279b51a41a26badaf03
+  6da95857c19202120af76871c91a47a0f23aed8d
+  b02a7e1aeadda724976290528fb864f99f1e396b
+  5a01b3f35d7b6182c78b6973db8d99bdabd4f9c3
+  a661dc36f68b5ebb1247a503533f8067ff8c0432
+  f43580f17d9977ea330deacc8931982e41a49abf
+  cc7d50a5714bc810af51b0c55be12b4f55acc089
+  052a85d18859faeb38b01c9bbec560afe226e2a4
 )
 
 _reverts=(
@@ -257,7 +268,7 @@ package_systemd-resolvconf() {
   pkgdesc='systemd resolvconf replacement'
   license=('GPL2')
   depends=('systemd')
-  provides=('openresolv')
+  provides=('openresolv' 'resolvconf')
   conflicts=('openresolv')
 
   install -dm0755 "$pkgdir"/usr/bin
