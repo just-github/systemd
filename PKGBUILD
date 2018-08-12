@@ -8,7 +8,7 @@ pkgname=('systemd' 'libsystemd' 'systemd-resolvconf' 'systemd-sysvcompat')
 # Can be from either systemd or systemd-stable
 _commit='de7436b02badc82200dc127ff190b8155769b8e7'
 pkgver=239.0
-pkgrel=2
+pkgrel=3
 arch=('x86_64')
 url="https://www.github.com/systemd/systemd"
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
@@ -19,8 +19,9 @@ makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
 options=('strip')
 validpgpkeys=('63CDA1E5D3FC22B998D20DD6327F26951A015CC4'  # Lennart Poettering <lennart@poettering.net>
               '5C251B5FC54EB2F80F407AAAC54CA336CFEB557E') # Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl>
-source=('git+https://github.com/systemd/systemd-stable'
-        'git+https://github.com/systemd/systemd'
+source=(# fragment is latest tag for source verification, final merge in prepare()
+        "git+https://github.com/systemd/systemd-stable#tag=v${pkgver%.*}?signed"
+        "git+https://github.com/systemd/systemd#tag=v${pkgver%.*}?signed"
         '0001-Use-Manjaro-Linux-device-access-groups.patch'
         'initcpio-hook-udev'
         'initcpio-install-systemd'
@@ -72,53 +73,30 @@ _backports=(
   f43580f17d9977ea330deacc8931982e41a49abf
   cc7d50a5714bc810af51b0c55be12b4f55acc089
   052a85d18859faeb38b01c9bbec560afe226e2a4
+  # build-sys: Detect whether struct statx is defined in sys/stat.h 
+  75720bff62a84896e9a0654afc7cf9408cf89a38
 )
 
 _reverts=(
-)
-
-_validate_tag() (
-  local success fingerprint trusted status tag=v${pkgver%.*}
-
-  cd "$srcdir/$pkgbase-stable"
-  parse_gpg_statusfile /dev/stdin < <(git verify-tag --raw "$tag" 2>&1)
-
-  if (( ! success )); then
-    error 'failed to validate tag %s\n' "$tag"
-    return 1
-  fi
-
-  if ! in_array "$fingerprint" "${validpgpkeys[@]}" && (( ! trusted )); then
-    error 'unknown or untrusted public key: %s\n' "$fingerprint"
-    return 1
-  fi
-
-  case $status in
-    'expired')
-      warning 'the signature has expired'
-      ;;
-    'expiredkey')
-      warning 'the key has expired'
-      ;;
-  esac
-
-  return 0
+  # https://github.com/systemd/systemd/issues/9748
+  6f130e85c76cfc2c58ba31f90d2ac3800866c1dd
 )
 
 prepare() {
   cd "$pkgbase-stable"
 
+  # add upstream repository for cherry-picking
   git remote add -f upstream ../systemd
-  git checkout "$_commit"
+  # merge the latest stable commit (fast-foward only to make sure
+  # the verified tag is in)
+  git merge --ff-only "${_commit}"
 
-  local c
-  for c in "${_backports[@]}"; do
-    echo "patching $c"
-    git cherry-pick -n "$c"
+  local _c
+  for _c in "${_backports[@]}"; do
+    git cherry-pick -n "${_c}"
   done
-  for c in "${_reverts[@]}"; do
-    echo "reverting $c"
-    git revert -n "$c"
+  for _c in "${_reverts[@]}"; do
+    git revert -n "${_c}"
   done
 
   # Replace cdrom/dialout/tape groups with optical/uucp/storage
@@ -126,39 +104,49 @@ prepare() {
 }
 
 pkgver() {
-  local version count
-
   cd "$pkgbase-stable"
 
-  version="$(git describe --abbrev=0 --tags)"
-  count="$(git rev-list --count ${version}..)"
-  printf '%s.%s' "${version#v}" "${count}"
+  local _version _count
+  _version="$(git describe --abbrev=0 --tags)"
+  _count="$(git rev-list --count ${_version}..)"
+  printf '%s.%s' "${_version#v}" "${_count}"
 }
 
 build() {
-  _validate_tag || return
+  local _timeservers=({0..3}.manjaro.pool.ntp.org)
+  local _nameservers=(
+    # We use these public name services, ordered by their
+    # privacy policy (hopefully):
+    #  * Cloudflare (https://1.1.1.1/)
+    #  * Quad9 without filtering (https://www.quad9.net/)
+    #  * Google (https://developers.google.com/speed/public-dns/)
+    1.1.1.1
+    9.9.9.10
+    8.8.8.8
+    2606:4700:4700::1111
+    2620:fe::10
+    2001:4860:4860::8888
+  )
 
-  local timeservers=({0..3}.manjaro.pool.ntp.org)
-
-  local meson_options=(
+  local _meson_options=(
     -Daudit=false
     -Dgnuefi=true
     -Dima=false
     -Dlz4=true
 
     -Ddbuspolicydir=/usr/share/dbus-1/system.d
-    -Ddefault-dnssec=no
     # TODO(dreisner): consider changing this to unified
     -Ddefault-hierarchy=hybrid
     -Ddefault-kill-user-processes=false
     -Dfallback-hostname='manjaro'
-    -Dntp-servers="${timeservers[*]}"
+    -Dntp-servers="${_timeservers[*]}"
+    -Ddns-servers="${_nameservers[*]}"
     -Drpmmacrosdir=no
     -Dsysvinit-path=
     -Dsysvrcnd-path=
   )
 
-  arch-meson "$pkgbase-stable" build "${meson_options[@]}"
+  arch-meson "$pkgbase-stable" build "${_meson_options[@]}"
 
   ninja -C build
 }
@@ -169,7 +157,7 @@ build() {
 #}
 
 package_systemd() {
-  pkgdesc="system and service manager"
+  pkgdesc='system and service manager'
   license=('GPL2' 'LGPL2.1')
   groups=('base-devel')
   depends=('acl' 'bash' 'cryptsetup' 'dbus' 'iptables' 'kbd' 'kmod' 'hwids' 'libcap'
@@ -205,17 +193,17 @@ package_systemd() {
   rmdir "$pkgdir"/var/log/journal/remote
 
   # runtime libraries shipped with libsystemd
-  install -dm755 libsystemd
+  install -d -m0755 libsystemd
   mv "$pkgdir"/usr/lib/lib{nss,systemd,udev}*.so* libsystemd
 
   # manpages shipped with systemd-sysvcompat
   rm "$pkgdir"/usr/share/man/man8/{halt,poweroff,reboot,runlevel,shutdown,telinit}.8
 
-  # files shipped with systemd-resolvconf
-  rm "$pkgdir"/usr/{bin/resolvconf,share/man/man1/resolvconf.1}
-
   # executable (symlinks) shipped with systemd-sysvcompat
   rm "$pkgdir"/usr/bin/{halt,init,poweroff,reboot,runlevel,shutdown,telinit}
+
+  # files shipped with systemd-resolvconf
+  rm "$pkgdir"/usr/{bin/resolvconf,share/man/man1/resolvconf.1}
 
   # avoid a potential conflict with [core]/filesystem
   rm "$pkgdir"/usr/share/factory/etc/nsswitch.conf
@@ -228,9 +216,9 @@ package_systemd() {
   echo 'disable *' >"$pkgdir"/usr/lib/systemd/system-preset/99-default.preset
 
   # add mkinitcpio hooks
-  install -Dm0644 initcpio-install-systemd "$pkgdir"/usr/lib/initcpio/install/systemd
-  install -Dm0644 initcpio-install-udev "$pkgdir"/usr/lib/initcpio/install/udev
-  install -Dm0644 initcpio-hook-udev "$pkgdir"/usr/lib/initcpio/hooks/udev
+  install -D -m0644 initcpio-install-systemd "$pkgdir"/usr/lib/initcpio/install/systemd
+  install -D -m0644 initcpio-install-udev "$pkgdir"/usr/lib/initcpio/install/udev
+  install -D -m0644 initcpio-hook-udev "$pkgdir"/usr/lib/initcpio/hooks/udev
 
   # ensure proper permissions for /var/log/journal
   # The permissions are stored with named group by tar, so this works with
@@ -242,25 +230,25 @@ package_systemd() {
   install -d -o root -g 102 -m 0750 "$pkgdir"/usr/share/polkit-1/rules.d
 
   # add example bootctl configuration
-  install -Dm0644 manjaro.conf "$pkgdir"/usr/share/systemd/bootctl/manjaro.conf
-  install -Dm0644 loader.conf "$pkgdir"/usr/share/systemd/bootctl/loader.conf
-  install -Dm0644 splash-manjaro.bmp "$pkgdir"/usr/share/systemd/bootctl/splash-manjaro.bmp
+  install -D -m0644 manjaro.conf "$pkgdir"/usr/share/systemd/bootctl/manjaro.conf
+  install -D -m0644 loader.conf "$pkgdir"/usr/share/systemd/bootctl/loader.conf
+  install -D -m0644 splash-manjaro.bmp "$pkgdir"/usr/share/systemd/bootctl/splash-manjaro.bmp
 
   # pacman hooks
-  install -Dm0755 systemd-hook "$pkgdir"/usr/share/libalpm/scripts/systemd-hook
-  install -Dm0644 -t "$pkgdir"/usr/share/libalpm/hooks *.hook
+  install -D -m0755 systemd-hook "$pkgdir"/usr/share/libalpm/scripts/systemd-hook
+  install -D -m0644 -t "$pkgdir"/usr/share/libalpm/hooks *.hook
 
   # overwrite the systemd-user PAM configuration with our own
-  install -Dm0644 systemd-user.pam "$pkgdir"/etc/pam.d/systemd-user
+  install -D -m0644 systemd-user.pam "$pkgdir"/etc/pam.d/systemd-user
 }
 
 package_libsystemd() {
-  pkgdesc="systemd client libraries"
+  pkgdesc='systemd client libraries'
   depends=('glibc' 'libcap' 'libgcrypt' 'lz4' 'xz')
   license=('GPL2')
   provides=('libsystemd.so' 'libudev.so')
 
-  install -dm0755 "$pkgdir"/usr
+  install -d -m0755 "$pkgdir"/usr
   mv libsystemd "$pkgdir"/usr/lib
 }
 
@@ -271,24 +259,24 @@ package_systemd-resolvconf() {
   provides=('openresolv' 'resolvconf')
   conflicts=('openresolv')
 
-  install -dm0755 "$pkgdir"/usr/bin
+  install -d -m0755 "$pkgdir"/usr/bin
   ln -s resolvectl "$pkgdir"/usr/bin/resolvconf
 
-  install -dm0755 "$pkgdir"/usr/share/man/man1
+  install -d -m0755 "$pkgdir"/usr/share/man/man1
   ln -s resolvectl.1.gz "$pkgdir"/usr/share/man/man1/resolvconf.1.gz
 }
 
 package_systemd-sysvcompat() {
-  pkgdesc="sysvinit compat for systemd"
+  pkgdesc='sysvinit compat for systemd'
   license=('GPL2')
   groups=('base')
   conflicts=('sysvinit')
   depends=('systemd')
 
-  install -Dm0644 -t "$pkgdir"/usr/share/man/man8 \
+  install -D -m0644 -t "$pkgdir"/usr/share/man/man8 \
     build/man/{telinit,halt,reboot,poweroff,runlevel,shutdown}.8
 
-  install -dm0755 "$pkgdir"/usr/bin
+  install -d -m0755 "$pkgdir"/usr/bin
   ln -s ../lib/systemd/systemd "$pkgdir"/usr/bin/init
   for tool in runlevel reboot shutdown poweroff halt telinit; do
     ln -s systemctl "$pkgdir"/usr/bin/$tool
