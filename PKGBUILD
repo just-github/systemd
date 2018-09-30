@@ -8,14 +8,15 @@ pkgname=('systemd' 'libsystemd' 'systemd-resolvconf' 'systemd-sysvcompat')
 # Can be from either systemd or systemd-stable
 _commit='c38499d476026d999558a7eee9c95ca2fa41e115'
 pkgver=239.2
-pkgrel=1
-arch=('x86_64')
-url="https://www.github.com/systemd/systemd"
+pkgrel=2
+arch=('i686' 'x86_64')
+url='https://www.github.com/systemd/systemd'
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
-             'intltool' 'iptables' 'kmod' 'libcap' 'libidn' 'libgcrypt'
+             'intltool' 'iptables' 'kmod' 'libcap' 'libidn2' 'libgcrypt'
              'libmicrohttpd' 'libxslt' 'util-linux' 'linux-api-headers'
              'python-lxml' 'quota-tools' 'shadow' 'gnu-efi-libs' 'git'
-             'meson' 'libseccomp' 'pcre2')
+             'meson' 'libseccomp' 'pcre2' 'audit' 'kexec-tools' 'libxkbcommon'
+             'bash-completion')
 options=('strip')
 validpgpkeys=('63CDA1E5D3FC22B998D20DD6327F26951A015CC4'  # Lennart Poettering <lennart@poettering.net>
               '5C251B5FC54EB2F80F407AAAC54CA336CFEB557E') # Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl>
@@ -23,6 +24,7 @@ source=(# fragment is latest tag for source verification, final merge in prepare
         "git+https://github.com/systemd/systemd-stable#tag=v${pkgver%.*}?signed"
         "git+https://github.com/systemd/systemd#tag=v${pkgver%.*}?signed"
         '0001-Use-Manjaro-Linux-device-access-groups.patch'
+        '0002-meson-rename-Ddebug-to-Ddebug-extra.patch'
         'initcpio-hook-udev'
         'initcpio-install-systemd'
         'initcpio-install-udev'
@@ -43,6 +45,7 @@ source=(# fragment is latest tag for source verification, final merge in prepare
 sha512sums=('SKIP'
             'SKIP'
             '764c571f68d092928b9e01c2422bac7c08cc1ac91f969ff2636156c733c81b7cc3f4cd089f8e607a0aad9725751cd52e5fd66c4a8810f16dce6a97906d7fc40a'
+            'd310e7ea099bd371eb12fb4f474f1518ddc1013612d6a53c3f5777e6a3509eb58c4b5989d31bb04784be70db5d8ca39bff47414456c3fe322194cd7b341ae70c'
             'f0d933e8c6064ed830dec54049b0a01e27be87203208f6ae982f10fb4eddc7258cb2919d594cbfb9a33e74c3510cfd682f3416ba8e804387ab87d1a217eb4b73'
             '01de24951a05d38eca6b615a7645beb3677ca0e0f87638d133649f6dc14dcd2ea82594a60b793c31b14493a286d1d11a0d25617f54dbfa02be237652c8faa691'
             'a25b28af2e8c516c3a2eec4e64b8c7f70c21f974af4a955a4a9d45fd3e3ff0d2a98b4419fe425d47152d5acae77d64e69d8d014a7209524b75a81b0edb10bf3a'
@@ -101,6 +104,11 @@ prepare() {
 
   # Replace cdrom/dialout/tape groups with optical/uucp/storage
   patch -Np1 -i ../0001-Use-Manjaro-Linux-device-access-groups.patch
+
+  # Needed for i686 only
+  if [[ "$CARCH" == "i686" ]]; then
+    patch -Np1 -i ../0002-meson-rename-Ddebug-to-Ddebug-extra.patch
+  fi
 }
 
 pkgver() {
@@ -129,9 +137,9 @@ build() {
   )
 
   local _meson_options=(
-    -Daudit=false
-    -Dgnuefi=true
+    -Dgnu-efi=true
     -Dima=false
+    -Dlibidn2=true
     -Dlz4=true
 
     -Ddbuspolicydir=/usr/share/dbus-1/system.d
@@ -151,25 +159,25 @@ build() {
   ninja -C build
 }
 
-#check() {
-#  cd build
-#  meson test
-#}
+check() {
+  meson test -C build
+}
 
 package_systemd() {
   pkgdesc='system and service manager'
   license=('GPL2' 'LGPL2.1')
   groups=('base-devel')
   depends=('acl' 'bash' 'cryptsetup' 'dbus' 'iptables' 'kbd' 'kmod' 'hwids' 'libcap'
-           'libgcrypt' 'libsystemd' 'libidn' 'lz4' 'pam' 'libelf' 'libseccomp'
-           'util-linux' 'xz' 'pcre2')
+           'libgcrypt' 'libsystemd' 'libidn2' 'lz4' 'pam' 'libelf' 'libseccomp'
+           'util-linux' 'xz' 'pcre2' 'audit')
   provides=('nss-myhostname' "systemd-tools=$pkgver" "udev=$pkgver")
   replaces=('nss-myhostname' 'systemd-tools' 'udev')
   conflicts=('nss-myhostname' 'systemd-tools' 'udev')
   optdepends=('libmicrohttpd: remote journald capabilities'
               'quota-tools: kernel-level quota management'
               'systemd-sysvcompat: symlink package to provide sysvinit binaries'
-              'polkit: allow administration as unprivileged user')
+              'polkit: allow administration as unprivileged user'
+              'curl: machinectl pull-tar and pull-raw')
   backup=(etc/pam.d/systemd-user
           etc/systemd/coredump.conf
           etc/systemd/journald.conf
@@ -183,7 +191,7 @@ package_systemd() {
           etc/udev/udev.conf)
   install=systemd.install
 
-  DESTDIR="$pkgdir" ninja -C build install
+  DESTDIR="$pkgdir" meson install -C build
 
   # don't write units to /etc by default. some of these will be re-enabled on
   # post_install.
@@ -283,4 +291,4 @@ package_systemd-sysvcompat() {
   done
 }
 
-# vim: ft=sh syn=sh et
+# vim:ft=sh syn=sh et sw=2:
