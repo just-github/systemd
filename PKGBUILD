@@ -8,7 +8,7 @@ pkgname=('systemd' 'libsystemd' 'systemd-resolvconf' 'systemd-sysvcompat')
 # Can be from either systemd or systemd-stable
 _commit='c38499d476026d999558a7eee9c95ca2fa41e115'
 pkgver=239.2
-pkgrel=2
+pkgrel=3
 arch=('i686' 'x86_64')
 url='https://www.github.com/systemd/systemd'
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
@@ -105,10 +105,7 @@ prepare() {
   # Replace cdrom/dialout/tape groups with optical/uucp/storage
   patch -Np1 -i ../0001-Use-Manjaro-Linux-device-access-groups.patch
 
-  # Needed for i686 only
-  if [[ "$CARCH" == "i686" ]]; then
-    patch -Np1 -i ../0002-meson-rename-Ddebug-to-Ddebug-extra.patch
-  fi
+  patch -Np1 -i ../0002-meson-rename-Ddebug-to-Ddebug-extra.patch
 }
 
 pkgver() {
@@ -159,9 +156,9 @@ build() {
   ninja -C build
 }
 
-check() {
-  meson test -C build
-}
+#check() {
+#  meson test -C build
+#}
 
 package_systemd() {
   pkgdesc='system and service manager'
