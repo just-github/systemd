@@ -6,8 +6,8 @@
 pkgbase=systemd
 pkgname=('systemd' 'libsystemd' 'systemd-resolvconf' 'systemd-sysvcompat')
 # Can be from either systemd or systemd-stable
-_commit='3371efc365046b5ed9921ab80687f5add81bdc16'
-pkgver=239.3
+_commit='25d1ba1173e4cce9dab8a2c2164ce60f63fc68a5'
+pkgver=239.300
 pkgrel=1
 arch=('i686' 'x86_64')
 url='https://www.github.com/systemd/systemd'
@@ -44,7 +44,7 @@ source=(# fragment is latest tag for source verification, final merge in prepare
 sha512sums=('SKIP'
             'SKIP'
             '764c571f68d092928b9e01c2422bac7c08cc1ac91f969ff2636156c733c81b7cc3f4cd089f8e607a0aad9725751cd52e5fd66c4a8810f16dce6a97906d7fc40a'
-            'c022880cae1c14748fa53095380d5edff8e65ec839cbd2436b84ce66a2279560519b2887f923cd21e2802eff3b6cf0b6a1c1fbf6ebd22b84a51cd729713b626f'
+            '1f800fe10d1d1c8b1ff45ae352f84dd1918f5559fbf80338b17d490a581ae5e4895c0b51baee7dac9260f4b6f9965da2fa5d33f2a5e31b1afa6c1aafce3e1e49'
             '01de24951a05d38eca6b615a7645beb3677ca0e0f87638d133649f6dc14dcd2ea82594a60b793c31b14493a286d1d11a0d25617f54dbfa02be237652c8faa691'
             'a25b28af2e8c516c3a2eec4e64b8c7f70c21f974af4a955a4a9d45fd3e3ff0d2a98b4419fe425d47152d5acae77d64e69d8d014a7209524b75a81b0edb10bf3a'
             '72dfd0e513e61f391d2b0bf8d9f13c6e2d2732dd7bd52413dccc791c562ab6265062c17d5abe60a42db0775e0b2352eba5e18d14fa2740c176d82edac4867c32'
@@ -69,16 +69,12 @@ _backports=(
   fa6a69d7837f1d5fcd0ba279b51a41a26badaf03
   6da95857c19202120af76871c91a47a0f23aed8d
   b02a7e1aeadda724976290528fb864f99f1e396b
-  5a01b3f35d7b6182c78b6973db8d99bdabd4f9c3
   a661dc36f68b5ebb1247a503533f8067ff8c0432
   f43580f17d9977ea330deacc8931982e41a49abf
   cc7d50a5714bc810af51b0c55be12b4f55acc089
   052a85d18859faeb38b01c9bbec560afe226e2a4
   # statx fixes
-  75720bff62a84896e9a0654afc7cf9408cf89a38
   9c869d08d82c73f62ab3527567858ce4b0cf1257
-  # rename -Ddebug to -Ddebug-extra 
-  8f6b442a78d0b485f044742ad90b2e8271b4e68e
 )
 
 _reverts=(

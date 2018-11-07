@@ -1,7 +1,7 @@
 #!/usr/bin/ash
 
 run_earlyhook() {
-    if [ "$quiet" = "y" ]; then
+    if [ "$quiet" = "y" ] || [ -e "/usr/lib/firmware/bootsplash-themes" ]; then
         log_level=notice
     else
         log_level=info
