@@ -6,9 +6,9 @@
 pkgbase=systemd
 pkgname=('systemd' 'libsystemd' 'systemd-resolvconf' 'systemd-sysvcompat')
 # Can be from either systemd or systemd-stable
-_commit='25d1ba1173e4cce9dab8a2c2164ce60f63fc68a5'
-pkgver=239.300
-pkgrel=2
+_commit='63f95c0297aea62ce47d1389e5221c54992f580e'
+pkgver=239.303
+pkgrel=1
 arch=('i686' 'x86_64')
 url='https://www.github.com/systemd/systemd'
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
@@ -77,15 +77,9 @@ _backports=(
   9c869d08d82c73f62ab3527567858ce4b0cf1257
   # https://github.com/systemd/systemd/issues/9748
   1e190dfd5bb95036f937ef1dc46f43eb0a146612
-  # journal: adapt for new improved LZ4_decompress_safe_partial()
-  e41ef6fd0027d3619dc1cf062100b2d224d0ee7e
 )
 
 _reverts=(
-  # shared/sleep-config: add switches to kill specific sleep modes
-  6ebddf92527b5de840f021b8672b2977c2a58af5
-  # shared/sleep-config: forbid hibernation if resume= is not configured
-  6789dca0a26df0c44ff8020f0a4206bf21e52a7a
 )
 
 prepare() {
