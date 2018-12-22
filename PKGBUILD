@@ -8,7 +8,7 @@ pkgname=('systemd' 'libsystemd' 'systemd-resolvconf' 'systemd-sysvcompat')
 # Can be from either systemd or systemd-stable
 _commit='8eab766804ef4fa21d26c00fd0baab3f1a47bb5c'
 pkgver=240.1
-pkgrel=1
+pkgrel=2
 arch=('i686' 'x86_64')
 url='https://www.github.com/systemd/systemd'
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
@@ -66,6 +66,10 @@ _backports=(
 )
 
 _reverts=(
+  # https://src.fedoraproject.org/cgit/rpms/systemd.git/log/
+  '64d7f7b4a15f1534fb19fda6b601fec50783bee4'
+  '56c886dc7ed5b2bb0882ba85136f4070545bfc1b'
+  '49f3ee7e74c714f55aab395c080b1099fc17f7fd'
 )
 
 prepare() {
