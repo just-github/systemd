@@ -6,8 +6,8 @@
 pkgbase=systemd
 pkgname=('systemd' 'libsystemd' 'systemd-resolvconf' 'systemd-sysvcompat')
 # Can be from either systemd or systemd-stable
-_commit='3bf819c4ca718a6bc4b3b871cf52a0d1b518967d'
-pkgver=239.370
+_commit='8eab766804ef4fa21d26c00fd0baab3f1a47bb5c'
+pkgver=240.1
 pkgrel=1
 arch=('i686' 'x86_64')
 url='https://www.github.com/systemd/systemd'
@@ -21,7 +21,7 @@ options=('strip')
 validpgpkeys=('63CDA1E5D3FC22B998D20DD6327F26951A015CC4'  # Lennart Poettering <lennart@poettering.net>
               '5C251B5FC54EB2F80F407AAAC54CA336CFEB557E') # Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl>
 source=(# fragment is latest tag for source verification, final merge in prepare()
-        "git+https://github.com/systemd/systemd-stable#tag=v${pkgver%.*}?signed"
+        #"git+https://github.com/systemd/systemd-stable#tag=v${pkgver%.*}?signed"
         "git+https://github.com/systemd/systemd#tag=v${pkgver%.*}?signed"
         '0001-Use-Manjaro-Linux-device-access-groups.patch'
         'initcpio-hook-udev'
@@ -42,7 +42,7 @@ source=(# fragment is latest tag for source verification, final merge in prepare
         'systemd-udev-reload.hook'
         'systemd-update.hook')
 sha512sums=('SKIP'
-            'SKIP'
+            #'SKIP'
             '764c571f68d092928b9e01c2422bac7c08cc1ac91f969ff2636156c733c81b7cc3f4cd089f8e607a0aad9725751cd52e5fd66c4a8810f16dce6a97906d7fc40a'
             '1f800fe10d1d1c8b1ff45ae352f84dd1918f5559fbf80338b17d490a581ae5e4895c0b51baee7dac9260f4b6f9965da2fa5d33f2a5e31b1afa6c1aafce3e1e49'
             '01de24951a05d38eca6b615a7645beb3677ca0e0f87638d133649f6dc14dcd2ea82594a60b793c31b14493a286d1d11a0d25617f54dbfa02be237652c8faa691'
@@ -63,26 +63,14 @@ sha512sums=('SKIP'
             '209b01b044877cc986757fa4009a92ea98f480306c2530075d153203c3cd2b3afccab6aacc1453dee8857991e04270572f1700310705d7a0f4d5bed27fab8c67')
 
 _backports=(
-  # resolve
-  86b112a315464604f4b40222d8bbd912432d640c
-  a5042ec4d7840f79d49688f07bf9bae7203ac50e
-  fa6a69d7837f1d5fcd0ba279b51a41a26badaf03
-  6da95857c19202120af76871c91a47a0f23aed8d
-  b02a7e1aeadda724976290528fb864f99f1e396b
-  a661dc36f68b5ebb1247a503533f8067ff8c0432
-  f43580f17d9977ea330deacc8931982e41a49abf
-  cc7d50a5714bc810af51b0c55be12b4f55acc089
-  052a85d18859faeb38b01c9bbec560afe226e2a4
-  # statx fixes
-  9c869d08d82c73f62ab3527567858ce4b0cf1257
-  # https://github.com/systemd/systemd/issues/9748
-  1e190dfd5bb95036f937ef1dc46f43eb0a146612
 )
 
 _reverts=(
 )
 
 prepare() {
+  # workaround
+  cp -a "$pkgbase" "$pkgbase-stable"
   cd "$pkgbase-stable"
 
   # add upstream repository for cherry-picking
