@@ -8,7 +8,7 @@ pkgname=('systemd' 'libsystemd' 'systemd-resolvconf' 'systemd-sysvcompat')
 # Can be from either systemd or systemd-stable
 _commit='8eab766804ef4fa21d26c00fd0baab3f1a47bb5c'
 pkgver=240.1
-pkgrel=3
+pkgrel=4
 arch=('i686' 'x86_64')
 url='https://www.github.com/systemd/systemd'
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
@@ -24,6 +24,7 @@ source=(# fragment is latest tag for source verification, final merge in prepare
         "git+https://github.com/systemd/systemd-stable#tag=v${pkgver%.*}?signed"
         "git+https://github.com/systemd/systemd#tag=v${pkgver%.*}?signed"
         '0001-Use-Manjaro-Linux-device-access-groups.patch'
+        'https://patch-diff.githubusercontent.com/raw/systemd/systemd/pull/11244.patch'
         'initcpio-hook-udev'
         'initcpio-install-systemd'
         'initcpio-install-udev'
@@ -44,6 +45,7 @@ source=(# fragment is latest tag for source verification, final merge in prepare
 sha512sums=('SKIP'
             'SKIP'
             '764c571f68d092928b9e01c2422bac7c08cc1ac91f969ff2636156c733c81b7cc3f4cd089f8e607a0aad9725751cd52e5fd66c4a8810f16dce6a97906d7fc40a'
+            '0d54cca0d1dd33ac657e4c46b7ac4b30476a8e7b21a5a8978abd1c3ee196d87510507f45dbce3641a21481936dfe616d780534ed7eb8e505c9b35b2654c8a5e0'
             '1f800fe10d1d1c8b1ff45ae352f84dd1918f5559fbf80338b17d490a581ae5e4895c0b51baee7dac9260f4b6f9965da2fa5d33f2a5e31b1afa6c1aafce3e1e49'
             '01de24951a05d38eca6b615a7645beb3677ca0e0f87638d133649f6dc14dcd2ea82594a60b793c31b14493a286d1d11a0d25617f54dbfa02be237652c8faa691'
             'a25b28af2e8c516c3a2eec4e64b8c7f70c21f974af4a955a4a9d45fd3e3ff0d2a98b4419fe425d47152d5acae77d64e69d8d014a7209524b75a81b0edb10bf3a'
@@ -68,8 +70,6 @@ _backports=(
 _reverts=(
   # https://src.fedoraproject.org/cgit/rpms/systemd.git/log/
   '64d7f7b4a15f1534fb19fda6b601fec50783bee4'
-  '56c886dc7ed5b2bb0882ba85136f4070545bfc1b'
-  '49f3ee7e74c714f55aab395c080b1099fc17f7fd'
   # https://forum.manjaro.org/t/69396
   '2b2b7228bffef626fe8e9f131095995f3d50ee3b'
 )
@@ -84,15 +84,18 @@ prepare() {
   git merge --ff-only "${_commit}"
 
   local _c
-  for _c in "${_backports[@]}"; do
-    git cherry-pick -n "${_c}"
-  done
   for _c in "${_reverts[@]}"; do
     git revert -n "${_c}"
+  done
+  for _c in "${_backports[@]}"; do
+    git cherry-pick -n "${_c}"
   done
 
   # Replace cdrom/dialout/tape groups with optical/uucp/storage
   patch -Np1 -i ../0001-Use-Manjaro-Linux-device-access-groups.patch
+
+  # Fix udev issues
+  patch -Np1 -i ../11244.patch
 }
 
 pkgver() {
