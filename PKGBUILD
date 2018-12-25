@@ -8,7 +8,7 @@ pkgname=('systemd' 'libsystemd' 'systemd-resolvconf' 'systemd-sysvcompat')
 # Can be from either systemd or systemd-stable
 _commit='8eab766804ef4fa21d26c00fd0baab3f1a47bb5c'
 pkgver=240.1
-pkgrel=4
+pkgrel=5
 arch=('i686' 'x86_64')
 url='https://www.github.com/systemd/systemd'
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
@@ -25,6 +25,8 @@ source=(# fragment is latest tag for source verification, final merge in prepare
         "git+https://github.com/systemd/systemd#tag=v${pkgver%.*}?signed"
         '0001-Use-Manjaro-Linux-device-access-groups.patch'
         'https://patch-diff.githubusercontent.com/raw/systemd/systemd/pull/11244.patch'
+        'https://patch-diff.githubusercontent.com/raw/systemd/systemd/pull/11265.patch'
+        'https://patch-diff.githubusercontent.com/raw/systemd/systemd/pull/11266.patch'
         'initcpio-hook-udev'
         'initcpio-install-systemd'
         'initcpio-install-udev'
@@ -46,6 +48,8 @@ sha512sums=('SKIP'
             'SKIP'
             '764c571f68d092928b9e01c2422bac7c08cc1ac91f969ff2636156c733c81b7cc3f4cd089f8e607a0aad9725751cd52e5fd66c4a8810f16dce6a97906d7fc40a'
             '0d54cca0d1dd33ac657e4c46b7ac4b30476a8e7b21a5a8978abd1c3ee196d87510507f45dbce3641a21481936dfe616d780534ed7eb8e505c9b35b2654c8a5e0'
+            'f548838fc2b69e635c2ca61e1a7fca551dad7f35b0645c0857a0cf9cd8bf28b3f3f1e5bdcc1d260c312347b434ed23f5cd96651452dd521c0773d30d699873b4'
+            'a23994b8a2fdb5b00f454dbe089f3e7b7fc631c3f8d0fc7e5a8ae5f4e00a7350476d5d65c62e5bcaca20b7864cba2212974303b352736b6e5e1973dfeb7a75c7'
             '1f800fe10d1d1c8b1ff45ae352f84dd1918f5559fbf80338b17d490a581ae5e4895c0b51baee7dac9260f4b6f9965da2fa5d33f2a5e31b1afa6c1aafce3e1e49'
             '01de24951a05d38eca6b615a7645beb3677ca0e0f87638d133649f6dc14dcd2ea82594a60b793c31b14493a286d1d11a0d25617f54dbfa02be237652c8faa691'
             'a25b28af2e8c516c3a2eec4e64b8c7f70c21f974af4a955a4a9d45fd3e3ff0d2a98b4419fe425d47152d5acae77d64e69d8d014a7209524b75a81b0edb10bf3a'
@@ -96,6 +100,8 @@ prepare() {
 
   # Fix udev issues
   patch -Np1 -i ../11244.patch
+  patch -Np1 -i ../11265.patch
+  patch -Np1 -i ../11266.patch
 }
 
 pkgver() {
