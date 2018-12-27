@@ -1,0 +1,227 @@
+From b8cf5bbb6a84263cbe64a3b369ff78cf0959ead3 Mon Sep 17 00:00:00 2001
+From: Yu Watanabe <watanabe.yu+github@gmail.com>
+Date: Thu, 27 Dec 2018 06:26:42 +0900
+Subject: [PATCH 1/8] network: drop redundant link_set_state() in
+ link_request_set_neighbors()
+
+---
+ src/network/networkd-link.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/src/network/networkd-link.c b/src/network/networkd-link.c
+index e2851df31aa..e4ee53e1ce2 100644
+--- a/src/network/networkd-link.c
++++ b/src/network/networkd-link.c
+@@ -902,8 +902,6 @@ static int link_request_set_neighbors(Link *link) {
+         assert(link->network);
+         assert(link->state != _LINK_STATE_INVALID);
+ 
+-        link_set_state(link, LINK_STATE_CONFIGURING);
+-
+         LIST_FOREACH(neighbors, neighbor, link->network->neighbors) {
+                 r = neighbor_configure(neighbor, link, NULL);
+                 if (r < 0) {
+
+From 123ff8427d7932bce8afcca4e9052c59de5c58bb Mon Sep 17 00:00:00 2001
+From: Yu Watanabe <watanabe.yu+github@gmail.com>
+Date: Thu, 27 Dec 2018 06:29:35 +0900
+Subject: [PATCH 2/8] network: first set link state configuring in
+ link_set_addresses()
+
+---
+ src/network/networkd-link.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/network/networkd-link.c b/src/network/networkd-link.c
+index e4ee53e1ce2..83de6d994c7 100644
+--- a/src/network/networkd-link.c
++++ b/src/network/networkd-link.c
+@@ -1071,12 +1071,12 @@ static int link_request_set_addresses(Link *link) {
+         assert(link->network);
+         assert(link->state != _LINK_STATE_INVALID);
+ 
++        link_set_state(link, LINK_STATE_CONFIGURING);
++
+         r = link_set_bridge_fdb(link);
+         if (r < 0)
+                 return r;
+ 
+-        link_set_state(link, LINK_STATE_CONFIGURING);
+-
+         link_request_set_neighbors(link);
+ 
+         LIST_FOREACH(addresses, ad, link->network->static_addresses) {
+
+From ce566f6ee67450b3ac1acb7fc48ee82284965e62 Mon Sep 17 00:00:00 2001
+From: Yu Watanabe <watanabe.yu+github@gmail.com>
+Date: Thu, 27 Dec 2018 06:30:24 +0900
+Subject: [PATCH 3/8] network: check return value of
+ link_request_set_neighbors()
+
+---
+ src/network/networkd-link.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/src/network/networkd-link.c b/src/network/networkd-link.c
+index 83de6d994c7..830f937d961 100644
+--- a/src/network/networkd-link.c
++++ b/src/network/networkd-link.c
+@@ -1077,7 +1077,9 @@ static int link_request_set_addresses(Link *link) {
+         if (r < 0)
+                 return r;
+ 
+-        link_request_set_neighbors(link);
++        r = link_request_set_neighbors(link);
++        if (r < 0)
++                return r;
+ 
+         LIST_FOREACH(addresses, ad, link->network->static_addresses) {
+                 r = address_configure(ad, link, address_handler, false);
+
+From 6ed3bd4c7d40e8c376e8de82fe80f64f5df307cf Mon Sep 17 00:00:00 2001
+From: Yu Watanabe <watanabe.yu+github@gmail.com>
+Date: Thu, 27 Dec 2018 06:31:28 +0900
+Subject: [PATCH 4/8] network: do not check link is ready before setting
+ addresses
+
+Fixes #11272.
+---
+ src/network/networkd-link.c | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/src/network/networkd-link.c b/src/network/networkd-link.c
+index 830f937d961..585decb3d03 100644
+--- a/src/network/networkd-link.c
++++ b/src/network/networkd-link.c
+@@ -911,10 +911,9 @@ static int link_request_set_neighbors(Link *link) {
+                 }
+         }
+ 
+-        if (link->neighbor_messages == 0) {
++        if (link->neighbor_messages == 0)
+                 link->neighbors_configured = true;
+-                link_check_ready(link);
+-        } else
++        else
+                 log_link_debug(link, "Setting neighbors");
+ 
+         return 0;
+
+From f8ef5fb45a545d7edb51309dae1216dcf98dbf8a Mon Sep 17 00:00:00 2001
+From: Yu Watanabe <watanabe.yu+github@gmail.com>
+Date: Thu, 27 Dec 2018 06:55:07 +0900
+Subject: [PATCH 5/8] network: set *_configured = false when (re-)setting
+ addresses or friends
+
+---
+ src/network/networkd-link.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/src/network/networkd-link.c b/src/network/networkd-link.c
+index 585decb3d03..cdaf83c78af 100644
+--- a/src/network/networkd-link.c
++++ b/src/network/networkd-link.c
+@@ -794,6 +794,8 @@ static int link_set_routing_policy_rule(Link *link) {
+         assert(link);
+         assert(link->network);
+ 
++        link->routing_policy_rules_configured = false;
++
+         LIST_FOREACH(rules, rule, link->network->rules) {
+                 r = routing_policy_rule_get(link->manager, rule->family, &rule->from, rule->from_prefixlen, &rule->to,
+                                             rule->to_prefixlen, rule->tos, rule->fwmark, rule->table, rule->iif, rule->oif,
+@@ -868,6 +870,8 @@ static int link_request_set_routes(Link *link) {
+ 
+         (void) link_set_routing_policy_rule(link);
+ 
++        link->static_routes_configured = false;
++
+         /* First add the routes that enable us to talk to gateways, then add in the others that need a gateway. */
+         for (phase = 0; phase < _PHASE_MAX; phase++)
+                 LIST_FOREACH(routes, rt, link->network->static_routes) {
+@@ -902,6 +906,8 @@ static int link_request_set_neighbors(Link *link) {
+         assert(link->network);
+         assert(link->state != _LINK_STATE_INVALID);
+ 
++        link->neighbors_configured = false;
++
+         LIST_FOREACH(neighbors, neighbor, link->network->neighbors) {
+                 r = neighbor_configure(neighbor, link, NULL);
+                 if (r < 0) {
+@@ -1080,6 +1086,8 @@ static int link_request_set_addresses(Link *link) {
+         if (r < 0)
+                 return r;
+ 
++        link->addresses_configured = false;
++
+         LIST_FOREACH(addresses, ad, link->network->static_addresses) {
+                 r = address_configure(ad, link, address_handler, false);
+                 if (r < 0) {
+
+From d751f03565085a91cd764f3f0e822a6af4fc72c8 Mon Sep 17 00:00:00 2001
+From: Yu Watanabe <watanabe.yu+github@gmail.com>
+Date: Wed, 26 Dec 2018 23:16:20 +0100
+Subject: [PATCH 6/8] test: fix neighbor address
+
+---
+ test/test-network/systemd-networkd-tests.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/test/test-network/systemd-networkd-tests.py b/test/test-network/systemd-networkd-tests.py
+index 19572be1514..1574527aebf 100755
+--- a/test/test-network/systemd-networkd-tests.py
++++ b/test/test-network/systemd-networkd-tests.py
+@@ -795,7 +795,7 @@ def test_ipv6_neighbor(self):
+         output = subprocess.check_output(['ip', 'neigh', 'list']).rstrip().decode('utf-8')
+         print(output)
+         self.assertRegex(output, '192.168.10.1.*00:00:5e:00:02:65.*PERMANENT')
+-        self.assertRegex(output, '2004:da8:1:0::1.*00:00:5e:00:02:66.*PERMANENT')
++        self.assertRegex(output, '2004:da8:1::1.*00:00:5e:00:02:66.*PERMANENT')
+ 
+     def test_sysctl(self):
+         self.copy_unit_to_networkd_unit_path('25-sysctl.network', '12-dummy.netdev')
+
+From c483168e525473c288583e97290b19ef6cd06aa3 Mon Sep 17 00:00:00 2001
+From: Yu Watanabe <watanabe.yu+github@gmail.com>
+Date: Wed, 26 Dec 2018 23:30:35 +0100
+Subject: [PATCH 7/8] test-network: drop unused variable
+
+---
+ test/test-network/systemd-networkd-tests.py | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/test/test-network/systemd-networkd-tests.py b/test/test-network/systemd-networkd-tests.py
+index 1574527aebf..342a4e283a3 100755
+--- a/test/test-network/systemd-networkd-tests.py
++++ b/test/test-network/systemd-networkd-tests.py
+@@ -20,7 +20,6 @@
+ network_sysctl_ipv6_path='/proc/sys/net/ipv6/conf'
+ network_sysctl_ipv4_path='/proc/sys/net/ipv4/conf'
+ 
+-dnsmasq_config_file='/run/networkd-ci/test-dnsmasq.conf'
+ dnsmasq_pid_file='/run/networkd-ci/test-test-dnsmasq.pid'
+ dnsmasq_log_file='/run/networkd-ci/test-dnsmasq-log-file'
+ 
+
+From 6740a34d1e6d9eb1fb23c4f51da3764bb33bb51e Mon Sep 17 00:00:00 2001
+From: Yu Watanabe <watanabe.yu+github@gmail.com>
+Date: Wed, 26 Dec 2018 23:31:26 +0100
+Subject: [PATCH 8/8] test-network: disable DNS function of dnsmasq
+
+---
+ test/test-network/systemd-networkd-tests.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/test/test-network/systemd-networkd-tests.py b/test/test-network/systemd-networkd-tests.py
+index 342a4e283a3..5586767f464 100755
+--- a/test/test-network/systemd-networkd-tests.py
++++ b/test/test-network/systemd-networkd-tests.py
+@@ -100,7 +100,7 @@ def remove_unit_from_networkd_path(self, units):
+                     shutil.rmtree(os.path.join(network_unit_file_path, unit + '.d'))
+ 
+     def start_dnsmasq(self):
+-        subprocess.check_call('dnsmasq -8 /var/run/networkd-ci/test-dnsmasq-log-file --log-queries=extra --log-dhcp --pid-file=/var/run/networkd-ci/test-test-dnsmasq.pid --conf-file=/dev/null --interface=veth-peer --enable-ra --dhcp-range=2600::10,2600::20 --dhcp-range=192.168.5.10,192.168.5.200 -R --dhcp-leasefile=/var/run/networkd-ci/lease --dhcp-option=26,1492 --dhcp-option=option:router,192.168.5.1 --dhcp-option=33,192.168.5.4,192.168.5.5', shell=True)
++        subprocess.check_call('dnsmasq -8 /var/run/networkd-ci/test-dnsmasq-log-file --log-queries=extra --log-dhcp --pid-file=/var/run/networkd-ci/test-test-dnsmasq.pid --conf-file=/dev/null --interface=veth-peer --enable-ra --dhcp-range=2600::10,2600::20 --dhcp-range=192.168.5.10,192.168.5.200 -R --dhcp-leasefile=/var/run/networkd-ci/lease --dhcp-option=26,1492 --dhcp-option=option:router,192.168.5.1 --dhcp-option=33,192.168.5.4,192.168.5.5 --port=0', shell=True)
+ 
+         time.sleep(10)
+ 
