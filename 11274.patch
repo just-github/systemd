@@ -1,74 +1,31 @@
-From b8cf5bbb6a84263cbe64a3b369ff78cf0959ead3 Mon Sep 17 00:00:00 2001
+From a59a854b953c3789c4fd0911fe939171b25e35bd Mon Sep 17 00:00:00 2001
 From: Yu Watanabe <watanabe.yu+github@gmail.com>
-Date: Thu, 27 Dec 2018 06:26:42 +0900
-Subject: [PATCH 1/8] network: drop redundant link_set_state() in
- link_request_set_neighbors()
+Date: Sun, 30 Dec 2018 22:07:23 +0900
+Subject: [PATCH 1/6] network: do not ignore errors on
+ link_request_set_neighbors() and link_set_routing_policy()
 
 ---
- src/network/networkd-link.c | 2 --
- 1 file changed, 2 deletions(-)
+ src/network/networkd-link.c | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
 
 diff --git a/src/network/networkd-link.c b/src/network/networkd-link.c
-index e2851df31aa..e4ee53e1ce2 100644
+index cadf7f8b0be..589a016314c 100644
 --- a/src/network/networkd-link.c
 +++ b/src/network/networkd-link.c
-@@ -902,8 +902,6 @@ static int link_request_set_neighbors(Link *link) {
-         assert(link->network);
-         assert(link->state != _LINK_STATE_INVALID);
+@@ -866,7 +866,9 @@ static int link_request_set_routes(Link *link) {
  
--        link_set_state(link, LINK_STATE_CONFIGURING);
--
-         LIST_FOREACH(neighbors, neighbor, link->network->neighbors) {
-                 r = neighbor_configure(neighbor, link, NULL);
-                 if (r < 0) {
-
-From 123ff8427d7932bce8afcca4e9052c59de5c58bb Mon Sep 17 00:00:00 2001
-From: Yu Watanabe <watanabe.yu+github@gmail.com>
-Date: Thu, 27 Dec 2018 06:29:35 +0900
-Subject: [PATCH 2/8] network: first set link state configuring in
- link_set_addresses()
-
----
- src/network/networkd-link.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/src/network/networkd-link.c b/src/network/networkd-link.c
-index e4ee53e1ce2..83de6d994c7 100644
---- a/src/network/networkd-link.c
-+++ b/src/network/networkd-link.c
-@@ -1071,12 +1071,12 @@ static int link_request_set_addresses(Link *link) {
-         assert(link->network);
-         assert(link->state != _LINK_STATE_INVALID);
+         link_set_state(link, LINK_STATE_CONFIGURING);
  
-+        link_set_state(link, LINK_STATE_CONFIGURING);
-+
-         r = link_set_bridge_fdb(link);
-         if (r < 0)
-                 return r;
+-        (void) link_set_routing_policy_rule(link);
++        r = link_set_routing_policy_rule(link);
++        if (r < 0)
++                return r;
  
--        link_set_state(link, LINK_STATE_CONFIGURING);
--
-         link_request_set_neighbors(link);
+         /* First add the routes that enable us to talk to gateways, then add in the others that need a gateway. */
+         for (phase = 0; phase < _PHASE_MAX; phase++)
+@@ -1079,7 +1081,9 @@ static int link_request_set_addresses(Link *link) {
  
-         LIST_FOREACH(addresses, ad, link->network->static_addresses) {
-
-From ce566f6ee67450b3ac1acb7fc48ee82284965e62 Mon Sep 17 00:00:00 2001
-From: Yu Watanabe <watanabe.yu+github@gmail.com>
-Date: Thu, 27 Dec 2018 06:30:24 +0900
-Subject: [PATCH 3/8] network: check return value of
- link_request_set_neighbors()
-
----
- src/network/networkd-link.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
-
-diff --git a/src/network/networkd-link.c b/src/network/networkd-link.c
-index 83de6d994c7..830f937d961 100644
---- a/src/network/networkd-link.c
-+++ b/src/network/networkd-link.c
-@@ -1077,7 +1077,9 @@ static int link_request_set_addresses(Link *link) {
-         if (r < 0)
-                 return r;
+         link_set_state(link, LINK_STATE_CONFIGURING);
  
 -        link_request_set_neighbors(link);
 +        r = link_request_set_neighbors(link);
@@ -77,91 +34,116 @@ index 83de6d994c7..830f937d961 100644
  
          LIST_FOREACH(addresses, ad, link->network->static_addresses) {
                  r = address_configure(ad, link, address_handler, false);
-
-From 6ed3bd4c7d40e8c376e8de82fe80f64f5df307cf Mon Sep 17 00:00:00 2001
-From: Yu Watanabe <watanabe.yu+github@gmail.com>
-Date: Thu, 27 Dec 2018 06:31:28 +0900
-Subject: [PATCH 4/8] network: do not check link is ready before setting
- addresses
-
-Fixes #11272.
----
- src/network/networkd-link.c | 5 ++---
- 1 file changed, 2 insertions(+), 3 deletions(-)
-
-diff --git a/src/network/networkd-link.c b/src/network/networkd-link.c
-index 830f937d961..585decb3d03 100644
---- a/src/network/networkd-link.c
-+++ b/src/network/networkd-link.c
-@@ -911,10 +911,9 @@ static int link_request_set_neighbors(Link *link) {
-                 }
+@@ -1216,7 +1220,7 @@ static int link_request_set_addresses(Link *link) {
+ 
+                                 return 0;
+                         }
+-                }    
++                }
+ 
+                 log_link_debug(link, "Offering DHCPv4 leases");
          }
- 
--        if (link->neighbor_messages == 0) {
-+        if (link->neighbor_messages == 0)
-                 link->neighbors_configured = true;
--                link_check_ready(link);
--        } else
-+        else
-                 log_link_debug(link, "Setting neighbors");
- 
-         return 0;
 
-From f8ef5fb45a545d7edb51309dae1216dcf98dbf8a Mon Sep 17 00:00:00 2001
+From f4e7d79ab7ef2d1689e566eac8f11d709aed0c5d Mon Sep 17 00:00:00 2001
 From: Yu Watanabe <watanabe.yu+github@gmail.com>
-Date: Thu, 27 Dec 2018 06:55:07 +0900
-Subject: [PATCH 5/8] network: set *_configured = false when (re-)setting
- addresses or friends
+Date: Sun, 30 Dec 2018 22:10:32 +0900
+Subject: [PATCH 2/6] network: rename link_set_routing_policy_rule() to
+ link_request_set_routing_policy_rule()
 
+For consistency to other functions.
 ---
- src/network/networkd-link.c | 8 ++++++++
- 1 file changed, 8 insertions(+)
+ src/network/networkd-link.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/src/network/networkd-link.c b/src/network/networkd-link.c
-index 585decb3d03..cdaf83c78af 100644
+index 589a016314c..e529111171e 100644
 --- a/src/network/networkd-link.c
 +++ b/src/network/networkd-link.c
-@@ -794,6 +794,8 @@ static int link_set_routing_policy_rule(Link *link) {
+@@ -787,7 +787,7 @@ void link_check_ready(Link *link) {
+         return;
+ }
+ 
+-static int link_set_routing_policy_rule(Link *link) {
++static int link_request_set_routing_policy_rule(Link *link) {
+         RoutingPolicyRule *rule, *rrule = NULL;
+         int r;
+ 
+@@ -866,7 +866,7 @@ static int link_request_set_routes(Link *link) {
+ 
+         link_set_state(link, LINK_STATE_CONFIGURING);
+ 
+-        r = link_set_routing_policy_rule(link);
++        r = link_request_set_routing_policy_rule(link);
+         if (r < 0)
+                 return r;
+ 
+
+From 20be137790ac631c13bffa51fb3b10411834c9df Mon Sep 17 00:00:00 2001
+From: Yu Watanabe <watanabe.yu+github@gmail.com>
+Date: Sun, 30 Dec 2018 22:08:10 +0900
+Subject: [PATCH 3/6] network: set *_configured flags to false before
+ requesting addresses or freinds
+
+---
+ src/network/networkd-link.c | 15 +++++++++++++--
+ 1 file changed, 13 insertions(+), 2 deletions(-)
+
+diff --git a/src/network/networkd-link.c b/src/network/networkd-link.c
+index e529111171e..5f71830301e 100644
+--- a/src/network/networkd-link.c
++++ b/src/network/networkd-link.c
+@@ -794,6 +794,9 @@ static int link_request_set_routing_policy_rule(Link *link) {
          assert(link);
          assert(link->network);
  
++        link_set_state(link, LINK_STATE_CONFIGURING);
 +        link->routing_policy_rules_configured = false;
 +
          LIST_FOREACH(rules, rule, link->network->rules) {
                  r = routing_policy_rule_get(link->manager, rule->family, &rule->from, rule->from_prefixlen, &rule->to,
                                              rule->to_prefixlen, rule->tos, rule->fwmark, rule->table, rule->iif, rule->oif,
-@@ -868,6 +870,8 @@ static int link_request_set_routes(Link *link) {
+@@ -865,6 +868,7 @@ static int link_request_set_routes(Link *link) {
+         assert(link->state != _LINK_STATE_INVALID);
  
-         (void) link_set_routing_policy_rule(link);
- 
+         link_set_state(link, LINK_STATE_CONFIGURING);
 +        link->static_routes_configured = false;
-+
-         /* First add the routes that enable us to talk to gateways, then add in the others that need a gateway. */
-         for (phase = 0; phase < _PHASE_MAX; phase++)
-                 LIST_FOREACH(routes, rt, link->network->static_routes) {
-@@ -902,6 +906,8 @@ static int link_request_set_neighbors(Link *link) {
+ 
+         r = link_request_set_routing_policy_rule(link);
+         if (r < 0)
+@@ -905,6 +909,7 @@ static int link_request_set_neighbors(Link *link) {
+         assert(link->state != _LINK_STATE_INVALID);
+ 
+         link_set_state(link, LINK_STATE_CONFIGURING);
++        link->neighbors_configured = false;
+ 
+         LIST_FOREACH(neighbors, neighbor, link->network->neighbors) {
+                 r = neighbor_configure(neighbor, link, NULL);
+@@ -1075,12 +1080,18 @@ static int link_request_set_addresses(Link *link) {
          assert(link->network);
          assert(link->state != _LINK_STATE_INVALID);
  
-+        link->neighbors_configured = false;
++        link_set_state(link, LINK_STATE_CONFIGURING);
 +
-         LIST_FOREACH(neighbors, neighbor, link->network->neighbors) {
-                 r = neighbor_configure(neighbor, link, NULL);
-                 if (r < 0) {
-@@ -1080,6 +1086,8 @@ static int link_request_set_addresses(Link *link) {
++        /* Set false to all *_configured state we are configuring. */
++        link->addresses_configured = false;
++        link->neighbors_configured = false;
++        link->static_routes_configured = false;
++        link->routing_policy_rules_configured = false;
++
+         r = link_set_bridge_fdb(link);
          if (r < 0)
                  return r;
  
-+        link->addresses_configured = false;
-+
-         LIST_FOREACH(addresses, ad, link->network->static_addresses) {
-                 r = address_configure(ad, link, address_handler, false);
-                 if (r < 0) {
+-        link_set_state(link, LINK_STATE_CONFIGURING);
+-
+         r = link_request_set_neighbors(link);
+         if (r < 0)
+                 return r;
 
-From d751f03565085a91cd764f3f0e822a6af4fc72c8 Mon Sep 17 00:00:00 2001
+From a912ab5e2a71a15b88bd979bd5ea41f555e84d14 Mon Sep 17 00:00:00 2001
 From: Yu Watanabe <watanabe.yu+github@gmail.com>
 Date: Wed, 26 Dec 2018 23:16:20 +0100
-Subject: [PATCH 6/8] test: fix neighbor address
+Subject: [PATCH 4/6] test: fix neighbor address
 
 ---
  test/test-network/systemd-networkd-tests.py | 2 +-
@@ -181,10 +163,10 @@ index 19572be1514..1574527aebf 100755
      def test_sysctl(self):
          self.copy_unit_to_networkd_unit_path('25-sysctl.network', '12-dummy.netdev')
 
-From c483168e525473c288583e97290b19ef6cd06aa3 Mon Sep 17 00:00:00 2001
+From fdb06ec07e587a19d73fa21860a8182cc27421de Mon Sep 17 00:00:00 2001
 From: Yu Watanabe <watanabe.yu+github@gmail.com>
 Date: Wed, 26 Dec 2018 23:30:35 +0100
-Subject: [PATCH 7/8] test-network: drop unused variable
+Subject: [PATCH 5/6] test-network: drop unused variable
 
 ---
  test/test-network/systemd-networkd-tests.py | 1 -
@@ -203,10 +185,10 @@ index 1574527aebf..342a4e283a3 100755
  dnsmasq_log_file='/run/networkd-ci/test-dnsmasq-log-file'
  
 
-From 6740a34d1e6d9eb1fb23c4f51da3764bb33bb51e Mon Sep 17 00:00:00 2001
+From d0a0124cbd57c30f6cdf2bf006ab4fc72cefaf0c Mon Sep 17 00:00:00 2001
 From: Yu Watanabe <watanabe.yu+github@gmail.com>
 Date: Wed, 26 Dec 2018 23:31:26 +0100
-Subject: [PATCH 8/8] test-network: disable DNS function of dnsmasq
+Subject: [PATCH 6/6] test-network: disable DNS function of dnsmasq
 
 ---
  test/test-network/systemd-networkd-tests.py | 2 +-

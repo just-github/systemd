@@ -1,12 +1,46 @@
-From 1f17a35ef85e943965ffafe2ef6eebd98d6b917a Mon Sep 17 00:00:00 2001
+From 18fee12a2d489378a2a9b647db0d0eb8c43f5362 Mon Sep 17 00:00:00 2001
 From: Yu Watanabe <watanabe.yu+github@gmail.com>
-Date: Sat, 22 Dec 2018 19:39:51 +0900
-Subject: [PATCH 1/4] Revert "sd-device: ignore bind/unbind events for now"
+Date: Sun, 23 Dec 2018 03:06:47 +0900
+Subject: [PATCH 1/4] sd-device: fix segfault when error occurs in
+ device_new_from_{nulstr,strv}()
 
-This reverts commit 56c886dc7ed5b2bb0882ba85136f4070545bfc1b.
+As devpath may not be set yet.
+
+When debug logging is enabled, log_device_*() calls
+sd_device_get_sysname(). So, we should not assume that devpath is always
+set.
+
+Fixes #11258.
 ---
- src/libsystemd/sd-device/device-private.c | 9 ---------
- 1 file changed, 9 deletions(-)
+ src/libsystemd/sd-device/sd-device.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/src/libsystemd/sd-device/sd-device.c b/src/libsystemd/sd-device/sd-device.c
+index db58615df53..9b1ef444803 100644
+--- a/src/libsystemd/sd-device/sd-device.c
++++ b/src/libsystemd/sd-device/sd-device.c
+@@ -1002,6 +1002,9 @@ static int device_set_sysname(sd_device *device) {
+         const char *pos;
+         size_t len = 0;
+ 
++        if (!device->devpath)
++                return -EINVAL;
++
+         pos = strrchr(device->devpath, '/');
+         if (!pos)
+                 return -EINVAL;
+
+From 741756618a81a519ccd8f6b8583e687ae2489812 Mon Sep 17 00:00:00 2001
+From: Yu Watanabe <watanabe.yu+github@gmail.com>
+Date: Sun, 30 Dec 2018 22:45:31 +0900
+Subject: [PATCH 2/4] udev: ignore devices with bind/unbind actions by udevd,
+ not libsystemd
+
+This re-implements 56c886dc7ed5b2bb0882ba85136f4070545bfc1b in udevd.
+---
+ src/libsystemd/sd-device/device-private.c |  9 --------
+ src/udev/udevd.c                          | 26 ++++++++++++++---------
+ 2 files changed, 16 insertions(+), 19 deletions(-)
 
 diff --git a/src/libsystemd/sd-device/device-private.c b/src/libsystemd/sd-device/device-private.c
 index 01a5aa3d3f6..36beb3e7dfa 100644
@@ -28,11 +62,71 @@ index 01a5aa3d3f6..36beb3e7dfa 100644
                  } else if (streq(key, "SEQNUM")) {
                          r = safe_atou64(value, &seqnum);
                          if (r < 0)
+diff --git a/src/udev/udevd.c b/src/udev/udevd.c
+index fb8724ea872..65d347f2bd6 100644
+--- a/src/udev/udevd.c
++++ b/src/udev/udevd.c
+@@ -592,8 +592,8 @@ static void event_run(Manager *manager, struct event *event) {
+ 
+ static int event_queue_insert(Manager *manager, sd_device *dev) {
+         _cleanup_(sd_device_unrefp) sd_device *clone = NULL;
++        const char *val, *action;
+         struct event *event;
+-        const char *val;
+         uint64_t seqnum;
+         int r;
+ 
+@@ -618,6 +618,16 @@ static int event_queue_insert(Manager *manager, sd_device *dev) {
+         if (seqnum == 0)
+                 return -EINVAL;
+ 
++        r = sd_device_get_property_value(dev, "ACTION", &action);
++        if (r < 0)
++                return r;
++
++        /* FIXME: remove once we no longer flush previuos state for each action */
++        if (STR_IN_SET(action, "bind", "unbind")) {
++                log_device_debug(dev, "Device (SEQNUM=%"PRIu64", ACTION=%s) is ignored", seqnum, action);
++                return 0;
++        }
++
+         /* Save original device to restore the state on failures. */
+         r = device_shallow_clone(dev, &clone);
+         if (r < 0)
+@@ -647,14 +657,9 @@ static int event_queue_insert(Manager *manager, sd_device *dev) {
+ 
+         LIST_APPEND(event, manager->events, event);
+ 
+-        if (DEBUG_LOGGING) {
+-                if (sd_device_get_property_value(dev, "ACTION", &val) < 0)
+-                        val = NULL;
++        log_device_debug(dev, "Device (SEQNUM=%"PRIu64", ACTION=%s) is queued", seqnum, action);
+ 
+-                log_device_debug(dev, "Device (SEQNUM=%"PRIu64", ACTION=%s) is queued", seqnum, strnull(val));
+-        }
+-
+-        return 0;
++        return 1;
+ }
+ 
+ static void manager_kill_workers(Manager *manager) {
+@@ -1001,8 +1006,9 @@ static int on_uevent(sd_device_monitor *monitor, sd_device *dev, void *userdata)
+         device_ensure_usec_initialized(dev, NULL);
+ 
+         r = event_queue_insert(manager, dev);
+-        if (r < 0) {
+-                log_device_error_errno(dev, r, "Failed to insert device into event queue: %m");
++        if (r <= 0) {
++                if (r < 0)
++                        log_device_error_errno(dev, r, "Failed to insert device into event queue: %m");
+                 return 1;
+         }
+ 
 
-From 6d243cc3e79fa1b4de4388661c9318d17a3d9d1a Mon Sep 17 00:00:00 2001
+From de8a1578e4bc8f298e54d0bd7ba5f0310faaa75f Mon Sep 17 00:00:00 2001
 From: Yu Watanabe <watanabe.yu+github@gmail.com>
 Date: Sat, 22 Dec 2018 19:49:47 +0900
-Subject: [PATCH 2/4] Revert "udevd: configure a child process name for worker
+Subject: [PATCH 3/4] Revert "udevd: configure a child process name for worker
  processes"
 
 This reverts commit 49f3ee7e74c714f55aab395c080b1099fc17f7fd.
@@ -41,7 +135,7 @@ This reverts commit 49f3ee7e74c714f55aab395c080b1099fc17f7fd.
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/udev/udevd.c b/src/udev/udevd.c
-index fb8724ea872..ec77bd4a718 100644
+index 65d347f2bd6..115ee3a9864 100644
 --- a/src/udev/udevd.c
 +++ b/src/udev/udevd.c
 @@ -534,7 +534,7 @@ static int worker_spawn(Manager *manager, struct event *event) {
@@ -54,37 +148,7 @@ index fb8724ea872..ec77bd4a718 100644
                  event->state = EVENT_QUEUED;
                  return log_error_errno(r, "Failed to fork() worker: %m");
 
-From 2c74c0647571941681f1c829e84dc81ec5394ecb Mon Sep 17 00:00:00 2001
-From: Yu Watanabe <watanabe.yu+github@gmail.com>
-Date: Sun, 23 Dec 2018 03:06:47 +0900
-Subject: [PATCH 3/4] sd-device: fix segfault when error occurs in
- device_new_from_{nulstr,strv}()
-
-As devpath may not be set yet.
-
-When debug logging is enabled, log_device_*() calls
-sd_device_get_sysname(). So, we should not assume that devpath is always
-set.
----
- src/libsystemd/sd-device/sd-device.c | 3 +++
- 1 file changed, 3 insertions(+)
-
-diff --git a/src/libsystemd/sd-device/sd-device.c b/src/libsystemd/sd-device/sd-device.c
-index db58615df53..9b1ef444803 100644
---- a/src/libsystemd/sd-device/sd-device.c
-+++ b/src/libsystemd/sd-device/sd-device.c
-@@ -1002,6 +1002,9 @@ static int device_set_sysname(sd_device *device) {
-         const char *pos;
-         size_t len = 0;
- 
-+        if (!device->devpath)
-+                return -EINVAL;
-+
-         pos = strrchr(device->devpath, '/');
-         if (!pos)
-                 return -EINVAL;
-
-From 2b10b668de4c44808a95354cc29f3d990f87b920 Mon Sep 17 00:00:00 2001
+From 8d83a62dba32be16736eb378289a8f8b48691a97 Mon Sep 17 00:00:00 2001
 From: Yu Watanabe <watanabe.yu+github@gmail.com>
 Date: Sun, 23 Dec 2018 03:28:28 +0900
 Subject: [PATCH 4/4] test: add test for sending/receiving an invalid device
