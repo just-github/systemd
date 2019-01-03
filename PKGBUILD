@@ -6,8 +6,8 @@
 pkgbase=systemd
 pkgname=('systemd' 'libsystemd' 'systemd-resolvconf' 'systemd-sysvcompat')
 # Can be from either systemd or systemd-stable
-_commit='04ca4d191b13e79e5701ed22dc972f08628d7bcc'
-pkgver=240.9
+_commit='88514e7bae0c918ca4b93714fbf2ae0f8f33855d'
+pkgver=240.58
 pkgrel=1
 arch=('i686' 'x86_64')
 url='https://www.github.com/systemd/systemd'
@@ -24,9 +24,6 @@ source=(# fragment is latest tag for source verification, final merge in prepare
         "git+https://github.com/systemd/systemd-stable#tag=v${pkgver%.*}?signed"
         "git+https://github.com/systemd/systemd#tag=v${pkgver%.*}?signed"
         '0001-Use-Manjaro-Linux-device-access-groups.patch'
-        'https://patch-diff.githubusercontent.com/raw/systemd/systemd/pull/11244.patch'
-        'https://patch-diff.githubusercontent.com/raw/systemd/systemd/pull/11265.patch'
-        'https://patch-diff.githubusercontent.com/raw/systemd/systemd/pull/11274.patch'
         'initcpio-hook-udev'
         'initcpio-install-systemd'
         'initcpio-install-udev'
@@ -47,9 +44,6 @@ source=(# fragment is latest tag for source verification, final merge in prepare
 sha512sums=('SKIP'
             'SKIP'
             '764c571f68d092928b9e01c2422bac7c08cc1ac91f969ff2636156c733c81b7cc3f4cd089f8e607a0aad9725751cd52e5fd66c4a8810f16dce6a97906d7fc40a'
-            'a161df6b064669871ae38e0f5c19a26cc50d350a27a9b5a5ebc503f1ed744413ab5021ebeabdf2a695849c9ed01587adb0217746c41d7f9d6b2d6936f0156b83'
-            'f548838fc2b69e635c2ca61e1a7fca551dad7f35b0645c0857a0cf9cd8bf28b3f3f1e5bdcc1d260c312347b434ed23f5cd96651452dd521c0773d30d699873b4'
-            'da4bcc94569a209600ab57bb09b1ab7432449ae19184140f765561e3bf8fd584c391f72c8e7cd2ad35fa0462de96820e6ee43b763a71b1f73c8bfbf9fe30b859'
             '1f800fe10d1d1c8b1ff45ae352f84dd1918f5559fbf80338b17d490a581ae5e4895c0b51baee7dac9260f4b6f9965da2fa5d33f2a5e31b1afa6c1aafce3e1e49'
             '01de24951a05d38eca6b615a7645beb3677ca0e0f87638d133649f6dc14dcd2ea82594a60b793c31b14493a286d1d11a0d25617f54dbfa02be237652c8faa691'
             'a25b28af2e8c516c3a2eec4e64b8c7f70c21f974af4a955a4a9d45fd3e3ff0d2a98b4419fe425d47152d5acae77d64e69d8d014a7209524b75a81b0edb10bf3a'
@@ -97,12 +91,6 @@ prepare() {
 
   # Replace cdrom/dialout/tape groups with optical/uucp/storage
   patch -Np1 -i ../0001-Use-Manjaro-Linux-device-access-groups.patch
-
-  # Fix udev issues
-  patch -Np1 -i ../11244.patch
-  patch -Np1 -i ../11265.patch
-  # Fix networkd issue
-  patch -Np1 -i ../11274.patch
 }
 
 pkgver() {
