@@ -6,8 +6,8 @@
 pkgbase=systemd
 pkgname=('systemd' 'libsystemd' 'systemd-resolvconf' 'systemd-sysvcompat')
 # Can be from either systemd or systemd-stable
-_commit='0192cbdb2c19ed2abbf6662090f45ab3bf4caf56'
-pkgver=240.161
+_commit='ee0b9e721a368742ac6fa9c3d9a33e45dc3203a2'
+pkgver=240.168
 pkgrel=1
 arch=('i686' 'x86_64')
 url='https://www.github.com/systemd/systemd'
@@ -23,7 +23,6 @@ validpgpkeys=('63CDA1E5D3FC22B998D20DD6327F26951A015CC4'  # Lennart Poettering <
 source=(# fragment is latest tag for source verification, final merge in prepare()
         "git+https://github.com/systemd/systemd-stable#tag=v${pkgver%.*}?signed"
         "git+https://github.com/systemd/systemd#tag=v${pkgver%.*}?signed"
-        'https://patch-diff.githubusercontent.com/raw/systemd/systemd/pull/11389.patch'
         'https://patch-diff.githubusercontent.com/raw/systemd/systemd/pull/11382.patch'
         '0001-Use-Manjaro-Linux-device-access-groups.patch'
         'initcpio-hook-udev'
@@ -45,7 +44,6 @@ source=(# fragment is latest tag for source verification, final merge in prepare
         'systemd-update.hook')
 sha512sums=('SKIP'
             'SKIP'
-            'bf6611ffc0d6793ccf7e932b8c82e2c7e66c77937cd9b7aedaabbfe8a2d78d2dfed0f123df2678889a919ab3db18d1592ab5650b91a9904dc28e38ff6eff1d3c'
             '9e1acb132922917383e3d837032bb3f22173ef7042d7c278f9b19c525bb13993b0689195f744f727f2ecfd8da4ca1d6c6b69f4fc1d6b63340b8756dbabd942f7'
             '764c571f68d092928b9e01c2422bac7c08cc1ac91f969ff2636156c733c81b7cc3f4cd089f8e607a0aad9725751cd52e5fd66c4a8810f16dce6a97906d7fc40a'
             '1f800fe10d1d1c8b1ff45ae352f84dd1918f5559fbf80338b17d490a581ae5e4895c0b51baee7dac9260f4b6f9965da2fa5d33f2a5e31b1afa6c1aafce3e1e49'
@@ -88,9 +86,6 @@ prepare() {
   for _c in "${_backports[@]}"; do
     git cherry-pick -n "${_c}"
   done
-
-  # https://github.com/systemd/systemd/issues/11314
-  patch -Np1 -i ../11389.patch
 
   # https://github.com/systemd/systemd/issues/3374
   patch -Np1 -i ../11382.patch
@@ -243,7 +238,7 @@ package_systemd() {
 package_libsystemd() {
   pkgdesc='systemd client libraries'
   depends=('glibc' 'libcap' 'libgcrypt' 'lz4' 'xz')
-  license=('GPL2')
+  license=('LGPL2.1')
   provides=('libsystemd.so' 'libudev.so')
 
   install -d -m0755 "$pkgdir"/usr
@@ -251,8 +246,8 @@ package_libsystemd() {
 }
 
 package_systemd-resolvconf() {
-  pkgdesc='systemd resolvconf replacement'
-  license=('GPL2')
+  pkgdesc='systemd resolvconf replacement (for use with systemd-resolved)'
+  license=('LGPL2.1')
   depends=('systemd')
   provides=('openresolv' 'resolvconf')
   conflicts=('openresolv')
