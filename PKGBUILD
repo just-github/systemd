@@ -6,8 +6,8 @@
 pkgbase=systemd
 pkgname=('systemd' 'libsystemd' 'systemd-resolvconf' 'systemd-sysvcompat')
 # Can be from either systemd or systemd-stable
-_commit='8464d9e0dc506538fd0f2d1d667966750cb9cf30'
-pkgver=240.275
+_commit='01dab40ba54f76c35b53fbfe78c9d7b340a2367f'
+pkgver=240.317
 pkgrel=1
 arch=('i686' 'x86_64')
 url='https://www.github.com/systemd/systemd'
@@ -87,8 +87,6 @@ prepare() {
 
   # Replace cdrom/dialout/tape groups with optical/uucp/storage
   patch -Np1 -i ../0001-Use-Manjaro-Linux-device-access-groups.patch
-
-
 }
 
 pkgver() {
