@@ -6,9 +6,10 @@
 pkgbase=systemd
 pkgname=('systemd' 'libsystemd' 'systemd-resolvconf' 'systemd-sysvcompat')
 # Can be from either systemd or systemd-stable
-_commit='064605ef5646a455a4272850b5f648abb9754a40'
-pkgver=241rc1
-pkgrel=1
+_commit='e327272d795453f68a4c30ba21eb0e887516cf68'
+pkgver=241rc2
+_pkgver=240
+pkgrel=3
 arch=('i686' 'x86_64')
 url='https://www.github.com/systemd/systemd'
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
@@ -21,8 +22,8 @@ options=('strip')
 validpgpkeys=('63CDA1E5D3FC22B998D20DD6327F26951A015CC4'  # Lennart Poettering <lennart@poettering.net>
               '5C251B5FC54EB2F80F407AAAC54CA336CFEB557E') # Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl>
 source=(# fragment is latest tag for source verification, final merge in prepare()
-        "git+https://github.com/systemd/systemd-stable#tag=v${pkgver%.*}?signed"
-        "git+https://github.com/systemd/systemd#tag=v${pkgver%.*}?signed"
+        "git+https://github.com/systemd/systemd-stable#tag=v${_pkgver%.*}?signed"
+        "git+https://github.com/systemd/systemd#tag=v${_pkgver%.*}?signed"
         '0001-Use-Manjaro-Linux-device-access-groups.patch'
         'initcpio-hook-udev'
         'initcpio-install-systemd'
@@ -96,7 +97,7 @@ pkgver() {
   _version="$(git describe --abbrev=0 --tags)"
   _count="$(git rev-list --count ${_version}..)"
 #  printf '%s.%s' "${_version#v}" "${_count}"
-  printf 241rc1
+  printf 241rc2
 }
 
 build() {
