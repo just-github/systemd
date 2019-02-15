@@ -4,12 +4,12 @@
 # Contributor: Tom Gundersen <teg@jklm.no>
 
 pkgbase=systemd
-pkgname=('systemd' 'libsystemd' 'systemd-resolvconf' 'systemd-sysvcompat')
+pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
 # Can be from either systemd or systemd-stable
-_commit='e327272d795453f68a4c30ba21eb0e887516cf68'
-pkgver=241rc2
-_pkgver=240
-pkgrel=3
+_commit='791cd1599311d2cfffec9cc7d2915b36cbd3047d'
+pkgver=241.71
+_pkgver=241
+pkgrel=1
 arch=('i686' 'x86_64')
 url='https://www.github.com/systemd/systemd'
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
@@ -96,8 +96,7 @@ pkgver() {
   local _version _count
   _version="$(git describe --abbrev=0 --tags)"
   _count="$(git rev-list --count ${_version}..)"
-#  printf '%s.%s' "${_version#v}" "${_count}"
-  printf 241rc2
+  printf '%s.%s' "${_version#v}" "${_count}"
 }
 
 build() {
@@ -117,6 +116,8 @@ build() {
   )
 
   local _meson_options=(
+    -Dversion-tag="${pkgver}-${pkgrel}-manjaro"
+
     -Dgnu-efi=true
     -Dima=false
     -Dlibidn2=true
@@ -148,7 +149,7 @@ package_systemd() {
   license=('GPL2' 'LGPL2.1')
   groups=('base-devel')
   depends=('acl' 'bash' 'cryptsetup' 'dbus' 'iptables' 'kbd' 'kmod' 'hwids' 'libcap'
-           'libgcrypt' 'libsystemd' 'libidn2' 'lz4' 'pam' 'libelf' 'libseccomp'
+           'libgcrypt' 'systemd-libs' 'libidn2' 'libidn2.so' 'lz4' 'pam' 'libelf' 'libseccomp'
            'util-linux' 'xz' 'pcre2' 'audit')
   provides=('nss-myhostname' "systemd-tools=$pkgver" "udev=$pkgver")
   replaces=('nss-myhostname' 'systemd-tools' 'udev')
@@ -180,9 +181,9 @@ package_systemd() {
   # we'll create this on installation
   rmdir "$pkgdir"/var/log/journal/remote
 
-  # runtime libraries shipped with libsystemd
-  install -d -m0755 libsystemd
-  mv "$pkgdir"/usr/lib/lib{nss,systemd,udev}*.so* libsystemd
+  # runtime libraries shipped with systemd-libs
+  install -d -m0755 systemd-libs
+  mv "$pkgdir"/usr/lib/lib{nss,systemd,udev}*.so* systemd-libs
 
   # manpages shipped with systemd-sysvcompat
   rm "$pkgdir"/usr/share/man/man8/{halt,poweroff,reboot,runlevel,shutdown,telinit}.8
@@ -230,14 +231,16 @@ package_systemd() {
   install -D -m0644 systemd-user.pam "$pkgdir"/etc/pam.d/systemd-user
 }
 
-package_libsystemd() {
+package_systemd-libs() {
   pkgdesc='systemd client libraries'
   depends=('glibc' 'libcap' 'libgcrypt' 'lz4' 'xz')
   license=('LGPL2.1')
-  provides=('libsystemd.so' 'libudev.so')
+  provides=('libsystemd' 'libsystemd.so' 'libudev.so')
+  conflicts=('libsystemd')
+  replaces=('libsystemd')
 
   install -d -m0755 "$pkgdir"/usr
-  mv libsystemd "$pkgdir"/usr/lib
+  mv systemd-libs "$pkgdir"/usr/lib
 }
 
 package_systemd-resolvconf() {
