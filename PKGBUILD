@@ -6,8 +6,8 @@
 pkgbase=systemd
 pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
 # Can be from either systemd or systemd-stable
-_commit='63eb09569aa90721be4accbea4b78421f3c1ba7c'
-pkgver=241.77
+_commit='4b05f0c9d9f6df4e0dab518f8e1ae537bf948f92'
+pkgver=241.155
 _pkgver=241
 pkgrel=1
 arch=('i686' 'x86_64')
