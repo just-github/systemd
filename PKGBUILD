@@ -6,8 +6,8 @@
 pkgbase=systemd
 pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
 # Can be from either systemd or systemd-stable
-_commit='4b05f0c9d9f6df4e0dab518f8e1ae537bf948f92'
-pkgver=241.155
+_commit='87dddbaf6271488e0c8d6a6e636f32d23877ac4a'
+pkgver=241.257
 _pkgver=241
 pkgrel=1
 arch=('i686' 'x86_64')
@@ -167,9 +167,11 @@ package_systemd() {
           etc/systemd/journal-remote.conf
           etc/systemd/journal-upload.conf
           etc/systemd/logind.conf
+          etc/systemd/networkd.conf
+          etc/systemd/resolved.conf
+          etc/systemd/sleep.conf
           etc/systemd/system.conf
           etc/systemd/timesyncd.conf
-          etc/systemd/resolved.conf
           etc/systemd/user.conf
           etc/udev/udev.conf)
   install=systemd.install
