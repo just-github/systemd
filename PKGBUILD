@@ -6,8 +6,8 @@
 pkgbase=systemd
 pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
 # Can be from either systemd or systemd-stable
-_commit='87dddbaf6271488e0c8d6a6e636f32d23877ac4a'
-pkgver=241.257
+_commit='bdc8f36bfb84b1213fa9affe46f46e6dc160d56d'
+pkgver=241.455
 _pkgver=241
 pkgrel=1
 arch=('i686' 'x86_64')
@@ -67,8 +67,6 @@ _backports=(
 )
 
 _reverts=(
-  # https://github.com/systemd/systemd/issues/11723
-  6f177c7dc092eb68762b4533d41b14244adb2a73
 )
 
 prepare() {
