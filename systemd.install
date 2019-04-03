@@ -74,6 +74,14 @@ post_install() {
 post_upgrade() {
   post_common "$@"
 
+  # delete symlink when present and reload service
+  if [[ -L /var/lib/systemd/timesync ]]; then
+    echo ":: Cleaning up timesync symlink. See also Arch FS#62161."
+    rm /var/lib/systemd/timesync
+    rm -rf /var/lib/private/systemd/timesync
+    systemctl restart systemd-timesyncd.service
+  fi
+
   # don't reexec if the old version is 231-1 or 231-2.
   # https://github.com/systemd/systemd/commit/bd64d82c1c
   if [[ $1 != 231-[12] ]] && sd_booted; then
