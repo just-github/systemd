@@ -6,8 +6,8 @@
 pkgbase=systemd
 pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
 # Can be from either systemd or systemd-stable
-_commit='fc40bfa7e271cf2191b605c321d16d09edfe235f'
-pkgver=242rc2.14
+_commit='55a37d7117bf01f5245dfab2db86adb59b8daf9e'
+pkgver=242
 _pkgver=241
 pkgrel=1
 arch=('i686' 'x86_64')
@@ -96,7 +96,8 @@ pkgver() {
   local _version _count
   _version="$(git describe --abbrev=0 --tags)"
   _count="$(git rev-list --count ${_version}..)"
-  printf '%s.%s' "${_version#v}" "${_count}" | sed s/-//
+#  printf '%s.%s' "${_version#v}" "${_count}" | sed s/-//
+printf '242'
 }
 
 build() {
