@@ -6,9 +6,8 @@
 pkgbase=systemd
 pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
 # Can be from either systemd or systemd-stable
-_commit='55a37d7117bf01f5245dfab2db86adb59b8daf9e'
-pkgver=242
-_pkgver=241
+_commit='1e5d2d656420d0e755dbcf72aeba3c3aba54e956'
+pkgver=242.0
 pkgrel=1
 arch=('i686' 'x86_64')
 url='https://www.github.com/systemd/systemd'
@@ -22,8 +21,8 @@ options=('strip')
 validpgpkeys=('63CDA1E5D3FC22B998D20DD6327F26951A015CC4'  # Lennart Poettering <lennart@poettering.net>
               '5C251B5FC54EB2F80F407AAAC54CA336CFEB557E') # Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl>
 source=(# fragment is latest tag for source verification, final merge in prepare()
-        "git+https://github.com/systemd/systemd-stable#tag=v${_pkgver%.*}?signed"
-        "git+https://github.com/systemd/systemd#tag=v${_pkgver%.*}?signed"
+        "git+https://github.com/systemd/systemd-stable#tag=v${pkgver%.*}?signed"
+        "git+https://github.com/systemd/systemd#tag=v${pkgver%.*}?signed"
         '0001-Use-Manjaro-Linux-device-access-groups.patch'
         'initcpio-hook-udev'
         'initcpio-install-systemd'
@@ -96,8 +95,7 @@ pkgver() {
   local _version _count
   _version="$(git describe --abbrev=0 --tags)"
   _count="$(git rev-list --count ${_version}..)"
-#  printf '%s.%s' "${_version#v}" "${_count}" | sed s/-//
-printf '242'
+  printf '%s.%s' "${_version#v}" "${_count}"
 }
 
 build() {
