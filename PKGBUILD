@@ -8,7 +8,7 @@ pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
 # Can be from either systemd or systemd-stable
 _commit='1e5d2d656420d0e755dbcf72aeba3c3aba54e956'
 pkgver=242.0
-pkgrel=1
+pkgrel=2
 arch=('i686' 'x86_64')
 url='https://www.github.com/systemd/systemd'
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
@@ -69,8 +69,12 @@ _reverts=(
 )
 
 prepare() {
-  cd "$pkgbase-stable"
+  # https://bugs.archlinux.org/task/62347?project=1&string=systemd&order=dateopened&sort=desc
+  cd "$pkgbase"
+  git fetch origin pull/12316/head:12316
+  cd ..
 
+  cd "$pkgbase-stable"
   # add upstream repository for cherry-picking
   git remote add -f upstream ../systemd
   # merge the latest stable commit (fast-foward only to make sure
