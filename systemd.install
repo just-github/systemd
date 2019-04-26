@@ -53,6 +53,15 @@ _233_75_3_changes() {
   fi
 }
 
+_242_0_2_changes() {
+  if [[ -L var/lib/systemd/timesync ]]; then
+    rm var/lib/systemd/timesync
+    if [[ -d var/lib/private/systemd/timesync ]]; then
+      mv var/lib/{private/,}systemd/timesync
+    fi
+  fi
+}
+
 post_install() {
   systemd-machine-id-setup
 
@@ -74,14 +83,6 @@ post_install() {
 post_upgrade() {
   post_common "$@"
 
-  # delete symlink when present and reload service
-  if [[ -L /var/lib/systemd/timesync ]]; then
-    echo ":: Cleaning up timesync symlink. See also Arch FS#62161."
-    rm /var/lib/systemd/timesync
-    rm -rf /var/lib/private/systemd/timesync
-    systemctl restart systemd-timesyncd.service
-  fi
-
   # don't reexec if the old version is 231-1 or 231-2.
   # https://github.com/systemd/systemd/commit/bd64d82c1c
   if [[ $1 != 231-[12] ]] && sd_booted; then
@@ -95,6 +96,7 @@ post_upgrade() {
     230-1
     232-8
     233.75-3
+    242.0-2
   )
 
   for v in "${upgrades[@]}"; do
@@ -103,5 +105,3 @@ post_upgrade() {
     fi
   done
 }
-
-# vim:set ts=2 sw=2 et:
