@@ -8,7 +8,7 @@ pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
 # Can be from either systemd or systemd-stable
 _commit='db2e367bfc3b119609f837eb973d915f6c550b2f'
 pkgver=242.19
-pkgrel=1
+pkgrel=2
 arch=('i686' 'x86_64')
 url='https://www.github.com/systemd/systemd'
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
@@ -144,6 +144,7 @@ build() {
     -Drpmmacrosdir=no
     -Dsysvinit-path=
     -Dsysvrcnd-path=
+    -Dsupport-url='https://forum.manjaro.org/c/technical-issues-and-assistance'
   )
 
   arch-meson "$pkgbase-stable" build "${_meson_options[@]}"
