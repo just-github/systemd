@@ -1,4 +1,5 @@
 # Maintainer: Philip Müller <philm@manjaro.org>
+# Maintainer: Bernhard Landauer <bernhard@manjaro.org>
 # Contributor: Christian Hesse <mail@eworm.de>
 # Contributor: Dave Reisner <dreisner@archlinux.org>
 # Contributor: Tom Gundersen <teg@jklm.no>
@@ -6,9 +7,9 @@
 pkgbase=systemd
 pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
 # Can be from either systemd or systemd-stable
-_commit='db2e367bfc3b119609f837eb973d915f6c550b2f'
-pkgver=242.19
-pkgrel=2
+_commit='298d13df7ef1097fa4801de573f668cef23a22b3'
+pkgver=242.29
+pkgrel=1
 arch=('i686' 'x86_64')
 url='https://www.github.com/systemd/systemd'
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
