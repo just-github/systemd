@@ -9,7 +9,7 @@ pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
 # Can be from either systemd or systemd-stable
 _commit='298d13df7ef1097fa4801de573f668cef23a22b3'
 pkgver=242.29
-pkgrel=1
+pkgrel=4
 arch=('i686' 'x86_64')
 url='https://www.github.com/systemd/systemd'
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
@@ -66,12 +66,30 @@ sha512sums=('SKIP'
 _backports=(
   # basic/socket-util: put a limit on the loop to flush connections
   '67962036f6c6cfd34828c1f1f1fbdc0018fb9898'
+
   # network: logs link state change
   '0beb9542e90ab1c5d1507a1046a326fbcf73861c'
-  # network: prevent interfaces to be initialized multiple times
-  'bd08ce56156751d58584a44e766ef61340cdae2d'
-  # network: fix ref/unref logic for Link object
-  '5f707e1280d7c66d3adcffd47a23ad446257f355'
+
+  # network: drop invalid assertion
+  '51aba17b88617515e037e8985d3a4ea871ac47fe'
+  # network: fix assertion when link get carrier
+  'b9ea3d2e47b3741f3f46ba9c5e19640136933b71'
+
+  # network: do not use ordered_set_printf() for DOMAINS= or ROUTE_DOMAINS=
+  'fe0e16db093a7da09fcb52a2bc7017197047443d'
+
+  # network: honor MTUBytes= setting
+  '933c70a0a4e4fac47d18e0348ae97ee3d48dc139'
+  # network: bump MTU bytes only when MTUByte= is not set
+  'f6fcc1c2a41eae749467de58453174296b635a69'
+
+  # networkd: fix link_up() (#12505)
+  '4eb086a38712ea98faf41e075b84555b11b54362'
+  # network: do not send ipv6 token to kernel
+  '9f6e82e6eb3b6e73d66d00d1d6eee60691fb702f'
+
+  # core: set fs.file-max sysctl to LONG_MAX rather than ULONG_MAX
+  '6e2f78948403a4cce45b9e34311c9577c624f066'
 )
 
 _reverts=(
@@ -135,6 +153,7 @@ build() {
     -Dlibidn2=true
     -Dlz4=true
 
+    -Dapparmor=false
     -Ddbuspolicydir=/usr/share/dbus-1/system.d
     -Ddefault-locale=C
     -Ddefault-hierarchy=hybrid
