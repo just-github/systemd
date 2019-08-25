@@ -9,7 +9,7 @@ pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
 # Can be from either systemd or systemd-stable
 _commit='07f0549ffe3413f0e78b656dd34d64681cbd8f00'
 pkgver=242.85
-pkgrel=2
+pkgrel=3
 arch=('i686' 'x86_64')
 url='https://www.github.com/systemd/systemd'
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
@@ -25,6 +25,7 @@ source=(# fragment is latest tag for source verification, final merge in prepare
         "git+https://github.com/systemd/systemd-stable#tag=v${pkgver%.*}?signed"
         "git+https://github.com/systemd/systemd#tag=v${pkgver%.*}?signed"
         '0001-Use-Manjaro-Linux-device-access-groups.patch'
+        '0002-Use-BFQ-scheduler-by-default.patch::https://patch-diff.githubusercontent.com/raw/systemd/systemd/pull/13321.patch'
         '20-systemd-sysusers.hook'
         'initcpio-hook-udev'
         'initcpio-install-systemd'
@@ -45,6 +46,7 @@ source=(# fragment is latest tag for source verification, final merge in prepare
 sha512sums=('SKIP'
             'SKIP'
             '764c571f68d092928b9e01c2422bac7c08cc1ac91f969ff2636156c733c81b7cc3f4cd089f8e607a0aad9725751cd52e5fd66c4a8810f16dce6a97906d7fc40a'
+            '354dc68833614f4c3448ebbbbeb8e6df1a7ac0bda5694ac3c005b138cffd35d59ca4dab2a1bb33ab0f993e301c43f7628c330e306fc0731365bb0918f306391c'
             '08a590d08043a21f30f04252164b94df972b1ff1022a0469d6aef713e14484a3a037cce290a2a582851e6fac3e64add69d6cc8fc130bbeeaea08626ebf3e1763'
             '1f800fe10d1d1c8b1ff45ae352f84dd1918f5559fbf80338b17d490a581ae5e4895c0b51baee7dac9260f4b6f9965da2fa5d33f2a5e31b1afa6c1aafce3e1e49'
             '01de24951a05d38eca6b615a7645beb3677ca0e0f87638d133649f6dc14dcd2ea82594a60b793c31b14493a286d1d11a0d25617f54dbfa02be237652c8faa691'
@@ -88,6 +90,10 @@ _backports=(
 
   # cgroup-util: kill also threads
   'e48fcfef06d81bf08607d3c1657fdc6aa1e9a6ee'
+
+  # udev: set "watch" for more devices
+  '5492c62a25313ec645e7330c016e2e406f5205e0'
+  'a71eb567886dd7d24f94f65d3cbd8e9651096777'
 )
 
 _reverts=(
@@ -116,6 +122,9 @@ prepare() {
 
   # Replace cdrom/dialout/tape groups with optical/uucp/storage
   patch -Np1 -i ../0001-Use-Manjaro-Linux-device-access-groups.patch
+
+  # Use BFQ scheduler by default
+  patch -Np1 -i ../0002-Use-BFQ-scheduler-by-default.patch
 }
 
 pkgver() {
