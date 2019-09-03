@@ -9,7 +9,7 @@ pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
 # Can be from either systemd or systemd-stable
 _commit='efb536d0cbe2e58f80e501d19999928c75e08f6a'
 pkgver=243.0
-pkgrel=1
+pkgrel=2
 arch=('i686' 'x86_64')
 url='https://www.github.com/systemd/systemd'
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
@@ -46,7 +46,7 @@ source=(# fragment is latest tag for source verification, final merge in prepare
 sha512sums=('SKIP'
             'SKIP'
             '764c571f68d092928b9e01c2422bac7c08cc1ac91f969ff2636156c733c81b7cc3f4cd089f8e607a0aad9725751cd52e5fd66c4a8810f16dce6a97906d7fc40a'
-            '354dc68833614f4c3448ebbbbeb8e6df1a7ac0bda5694ac3c005b138cffd35d59ca4dab2a1bb33ab0f993e301c43f7628c330e306fc0731365bb0918f306391c'
+            'd72090a6f1e25ef484daa30f85a54692333f87012396303ac76ef166def25a7160d38515137e91ecc4015f74edb2362b0f84b3baee209c7bccd0296afe154f36'
             '1f800fe10d1d1c8b1ff45ae352f84dd1918f5559fbf80338b17d490a581ae5e4895c0b51baee7dac9260f4b6f9965da2fa5d33f2a5e31b1afa6c1aafce3e1e49'
             '01de24951a05d38eca6b615a7645beb3677ca0e0f87638d133649f6dc14dcd2ea82594a60b793c31b14493a286d1d11a0d25617f54dbfa02be237652c8faa691'
             'a25b28af2e8c516c3a2eec4e64b8c7f70c21f974af4a955a4a9d45fd3e3ff0d2a98b4419fe425d47152d5acae77d64e69d8d014a7209524b75a81b0edb10bf3a'
