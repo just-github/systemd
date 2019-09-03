@@ -7,9 +7,9 @@
 pkgbase=systemd
 pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
 # Can be from either systemd or systemd-stable
-_commit='07f0549ffe3413f0e78b656dd34d64681cbd8f00'
-pkgver=242.85
-pkgrel=3
+_commit='efb536d0cbe2e58f80e501d19999928c75e08f6a'
+pkgver=243.0
+pkgrel=1
 arch=('i686' 'x86_64')
 url='https://www.github.com/systemd/systemd'
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
@@ -26,7 +26,6 @@ source=(# fragment is latest tag for source verification, final merge in prepare
         "git+https://github.com/systemd/systemd#tag=v${pkgver%.*}?signed"
         '0001-Use-Manjaro-Linux-device-access-groups.patch'
         '0002-Use-BFQ-scheduler-by-default.patch::https://patch-diff.githubusercontent.com/raw/systemd/systemd/pull/13321.patch'
-        '20-systemd-sysusers.hook'
         'initcpio-hook-udev'
         'initcpio-install-systemd'
         'initcpio-install-udev'
@@ -35,19 +34,19 @@ source=(# fragment is latest tag for source verification, final merge in prepare
         'splash-manjaro.bmp'
         'systemd-user.pam'
         'systemd-hook'
-        'systemd-binfmt.hook'
-        'systemd-catalog.hook'
-        'systemd-daemon-reload.hook'
-        'systemd-hwdb.hook'
-        'systemd-sysctl.hook'
-        'systemd-tmpfiles.hook'
-        'systemd-udev-reload.hook'
-        'systemd-update.hook')
+        '20-systemd-sysusers.hook'
+        '30-systemd-binfmt.hook'
+        '30-systemd-catalog.hook'
+        '30-systemd-daemon-reload.hook'
+        '30-systemd-hwdb.hook'
+        '30-systemd-sysctl.hook'
+        '30-systemd-tmpfiles.hook'
+        '30-systemd-udev-reload.hook'
+        '30-systemd-update.hook')
 sha512sums=('SKIP'
             'SKIP'
             '764c571f68d092928b9e01c2422bac7c08cc1ac91f969ff2636156c733c81b7cc3f4cd089f8e607a0aad9725751cd52e5fd66c4a8810f16dce6a97906d7fc40a'
             '354dc68833614f4c3448ebbbbeb8e6df1a7ac0bda5694ac3c005b138cffd35d59ca4dab2a1bb33ab0f993e301c43f7628c330e306fc0731365bb0918f306391c'
-            '08a590d08043a21f30f04252164b94df972b1ff1022a0469d6aef713e14484a3a037cce290a2a582851e6fac3e64add69d6cc8fc130bbeeaea08626ebf3e1763'
             '1f800fe10d1d1c8b1ff45ae352f84dd1918f5559fbf80338b17d490a581ae5e4895c0b51baee7dac9260f4b6f9965da2fa5d33f2a5e31b1afa6c1aafce3e1e49'
             '01de24951a05d38eca6b615a7645beb3677ca0e0f87638d133649f6dc14dcd2ea82594a60b793c31b14493a286d1d11a0d25617f54dbfa02be237652c8faa691'
             'a25b28af2e8c516c3a2eec4e64b8c7f70c21f974af4a955a4a9d45fd3e3ff0d2a98b4419fe425d47152d5acae77d64e69d8d014a7209524b75a81b0edb10bf3a'
@@ -56,6 +55,7 @@ sha512sums=('SKIP'
             '6200f2844bdcd230ef4efd27313a92b663a199fe7b3cf1794d17ca4d62bb2d7e9856e6a6e2ea0b912955df124c9d97374c70ae4ef2ff092b25296769fe9e8ba7'
             'b90c99d768dc2a4f020ba854edf45ccf1b86a09d2f66e475de21fe589ff7e32c33ef4aa0876d7f1864491488fd7edb2682fc0d68e83a6d4890a0778dc2d6fe19'
             '869dab2b1837c964add4019bb402e24e52dbb7f009850ca69fcc5deddd923eeb98eb8ee38601f6e31531f30322472fe7df09af84df27f0467708406c55885323'
+            '08a590d08043a21f30f04252164b94df972b1ff1022a0469d6aef713e14484a3a037cce290a2a582851e6fac3e64add69d6cc8fc130bbeeaea08626ebf3e1763'
             '5a6b6beef8c31c79018884d948de840f4d3dfb07d9a87081ebf65e2b8fe595bc8c96dbd7742920ccf948c233213ed0026abc913650cefd77ad90c6f8c89bddb8'
             '4cff2ebd962e26e2f516d8b4ac45c839dbfa54dd0588b423c224a328b9f7c62306ca7b2f6cb55240c564caf9972d5bcd2e0efaf2de49d64729aeb3bc1560c9eb'
             '872de70325e9798f0b5a77e991c85bd2ab6de24d9b9ba4e35002d2dd5df15f8b30739a0042a624776177ffc14a838cde7ee98622016ed41df3efda9a659730b2'
@@ -66,46 +66,14 @@ sha512sums=('SKIP'
             '209b01b044877cc986757fa4009a92ea98f480306c2530075d153203c3cd2b3afccab6aacc1453dee8857991e04270572f1700310705d7a0f4d5bed27fab8c67')
 
 _backports=(
-  # basic/socket-util: put a limit on the loop to flush connections
-  '67962036f6c6cfd34828c1f1f1fbdc0018fb9898'
-
-  # network: logs link state change
-  '0beb9542e90ab1c5d1507a1046a326fbcf73861c'
-
-  # network: drop invalid assertion
-  '51aba17b88617515e037e8985d3a4ea871ac47fe'
-  # network: fix assertion when link get carrier
-  'b9ea3d2e47b3741f3f46ba9c5e19640136933b71'
-
-  # network: do not use ordered_set_printf() for DOMAINS= or ROUTE_DOMAINS=
-  'fe0e16db093a7da09fcb52a2bc7017197047443d'
-
-  # network: honor MTUBytes= setting
-  '933c70a0a4e4fac47d18e0348ae97ee3d48dc139'
-  # network: bump MTU bytes only when MTUByte= is not set
-  'f6fcc1c2a41eae749467de58453174296b635a69'
-
-  # network: do not send ipv6 token to kernel
-  '9f6e82e6eb3b6e73d66d00d1d6eee60691fb702f'
-
-  # cgroup-util: kill also threads
-  'e48fcfef06d81bf08607d3c1657fdc6aa1e9a6ee'
-
-  # udev: set "watch" for more devices
-  '5492c62a25313ec645e7330c016e2e406f5205e0'
-  'a71eb567886dd7d24f94f65d3cbd8e9651096777'
 )
 
 _reverts=(
 )
 
 prepare() {
-  # https://bugs.archlinux.org/task/62347?project=1&string=systemd&order=dateopened&sort=desc
-  cd "$pkgbase"
-  git fetch origin pull/12316/head:12316
-  cd ..
-
   cd "$pkgbase-stable"
+
   # add upstream repository for cherry-picking
   git remote add -f upstream ../systemd
   # merge the latest stable commit (fast-foward only to make sure
@@ -113,11 +81,13 @@ prepare() {
   git merge --ff-only "${_commit}"
 
   local _c
-  for _c in "${_reverts[@]}"; do
-    git revert -n "${_c}"
-  done
   for _c in "${_backports[@]}"; do
+    git log --oneline -1 "${_c}"
     git cherry-pick -n "${_c}"
+  done
+  for _c in "${_reverts[@]}"; do
+    git log --oneline -1 "${_c}"
+    git revert -n "${_c}"
   done
 
   # Replace cdrom/dialout/tape groups with optical/uucp/storage
@@ -159,6 +129,7 @@ build() {
     -Dima=false
     -Dlibidn2=true
     -Dlz4=true
+    -Dman=true
 
     -Dapparmor=false
     -Ddbuspolicydir=/usr/share/dbus-1/system.d
@@ -215,10 +186,6 @@ package_systemd() {
 
   DESTDIR="$pkgdir" meson install -C build
 
-  # don't write units to /etc by default. some of these will be re-enabled on
-  # post_install.
-  rm -rv "$pkgdir"/etc/systemd/system/*
-
   # we'll create this on installation
   rmdir "$pkgdir"/var/log/journal/remote
 
@@ -236,8 +203,9 @@ package_systemd() {
   rm "$pkgdir"/usr/{bin/resolvconf,share/man/man1/resolvconf.1}
 
   # avoid a potential conflict with [core]/filesystem
-  rm "$pkgdir"/usr/share/factory/etc/nsswitch.conf
-  sed -i '/^C \/etc\/nsswitch\.conf/d' "$pkgdir"/usr/lib/tmpfiles.d/etc.conf
+  rm "$pkgdir"/usr/share/factory/etc/{issue,nsswitch.conf}
+  sed -i -e '/^C \/etc\/nsswitch\.conf/d' \
+    -e '/^C \/etc\/issue/d' "$pkgdir"/usr/lib/tmpfiles.d/etc.conf
 
   # add back tmpfiles.d/legacy.conf, normally omitted without sysv-compat
   install -m0644 $pkgbase-stable/tmpfiles.d/legacy.conf "$pkgdir"/usr/lib/tmpfiles.d
