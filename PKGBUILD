@@ -6,11 +6,10 @@
 
 pkgbase=systemd
 pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
-# Can be from either systemd or systemd-stable
-_commit='64d0f7042dfbaa306e16996d2fbb331ee7d59dc8'
-pkgver=243.9
+_tag='50a79652baa8650dc2bf7fe5979e67eb673a218e' # git rev-parse v${pkgver}
+pkgver=244.1
 pkgrel=1
-arch=('i686' 'x86_64')
+arch=('x86_64')
 url='https://www.github.com/systemd/systemd'
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
              'intltool' 'iptables' 'kmod' 'libcap' 'libidn2' 'libgcrypt'
@@ -21,8 +20,7 @@ makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
 options=('strip')
 validpgpkeys=('63CDA1E5D3FC22B998D20DD6327F26951A015CC4'  # Lennart Poettering <lennart@poettering.net>
               '5C251B5FC54EB2F80F407AAAC54CA336CFEB557E') # Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl>
-source=(# fragment is latest tag for source verification, final merge in prepare()
-        "git+https://github.com/systemd/systemd-stable#tag=v${pkgver%.*}?signed"
+source=("git+https://github.com/systemd/systemd-stable#tag=${_tag}?signed"
         "git+https://github.com/systemd/systemd#tag=v${pkgver%.*}?signed"
         '0001-Use-Manjaro-Linux-device-access-groups.patch'
         'initcpio-hook-udev'
@@ -44,8 +42,8 @@ source=(# fragment is latest tag for source verification, final merge in prepare
         '30-systemd-update.hook')
 sha512sums=('SKIP'
             'SKIP'
-            '764c571f68d092928b9e01c2422bac7c08cc1ac91f969ff2636156c733c81b7cc3f4cd089f8e607a0aad9725751cd52e5fd66c4a8810f16dce6a97906d7fc40a'
-            '1f800fe10d1d1c8b1ff45ae352f84dd1918f5559fbf80338b17d490a581ae5e4895c0b51baee7dac9260f4b6f9965da2fa5d33f2a5e31b1afa6c1aafce3e1e49'
+            'e38c7c422c82953f9c2476a5ab8009d614cbec839e4088bff5db7698ddc84e3d8ed64f32ed323f57b1913c5c9703546f794996cb415ed7cdda930b627962a3c4'
+            'f0d933e8c6064ed830dec54049b0a01e27be87203208f6ae982f10fb4eddc7258cb2919d594cbfb9a33e74c3510cfd682f3416ba8e804387ab87d1a217eb4b73'
             '01de24951a05d38eca6b615a7645beb3677ca0e0f87638d133649f6dc14dcd2ea82594a60b793c31b14493a286d1d11a0d25617f54dbfa02be237652c8faa691'
             'a25b28af2e8c516c3a2eec4e64b8c7f70c21f974af4a955a4a9d45fd3e3ff0d2a98b4419fe425d47152d5acae77d64e69d8d014a7209524b75a81b0edb10bf3a'
             '72dfd0e513e61f391d2b0bf8d9f13c6e2d2732dd7bd52413dccc791c562ab6265062c17d5abe60a42db0775e0b2352eba5e18d14fa2740c176d82edac4867c32'
@@ -74,9 +72,6 @@ prepare() {
 
   # add upstream repository for cherry-picking
   git remote add -f upstream ../systemd
-  # merge the latest stable commit (fast-foward only to make sure
-  # the verified tag is in)
-  git merge --ff-only "${_commit}"
 
   local _c
   for _c in "${_backports[@]}"; do
@@ -90,15 +85,6 @@ prepare() {
 
   # Replace cdrom/dialout/tape groups with optical/uucp/storage
   patch -Np1 -i ../0001-Use-Manjaro-Linux-device-access-groups.patch
-}
-
-pkgver() {
-  cd "$pkgbase-stable"
-
-  local _version _count
-  _version="$(git describe --abbrev=0 --tags)"
-  _count="$(git rev-list --count ${_version}..)"
-  printf '%s.%s' "${_version#v}" "${_count}"
 }
 
 build() {
@@ -126,17 +112,18 @@ build() {
     -Dlz4=true
     -Dman=true
 
-    -Dapparmor=false
     -Ddbuspolicydir=/usr/share/dbus-1/system.d
-    -Ddefault-locale=C
     -Ddefault-hierarchy=hybrid
     -Ddefault-kill-user-processes=false
+    -Ddefault-locale=C
     -Dfallback-hostname='manjaro'
+    -Dnologin-path=/usr/bin/nologin
     -Dntp-servers="${_timeservers[*]}"
     -Ddns-servers="${_nameservers[*]}"
     -Drpmmacrosdir=no
     -Dsysvinit-path=
     -Dsysvrcnd-path=
+    -Dapparmor=false
     -Dsupport-url='https://forum.manjaro.org/c/technical-issues-and-assistance'
   )
 
@@ -145,17 +132,16 @@ build() {
   ninja -C build
 }
 
-#check() {
-#  meson test -C build
-#}
+check() {
+  meson test -C build
+}
 
 package_systemd() {
   pkgdesc='system and service manager'
   license=('GPL2' 'LGPL2.1')
-  groups=('base-devel')
   depends=('acl' 'bash' 'cryptsetup' 'dbus' 'iptables' 'kbd' 'kmod' 'hwids' 'libcap'
-           'libgcrypt' 'systemd-libs' 'libidn2' 'libidn2.so' 'lz4' 'pam' 'libelf' 'libseccomp'
-           'util-linux' 'xz' 'pcre2' 'audit')
+           'libgcrypt' 'systemd-libs' 'libidn2' 'libidn2.so' 'lz4' 'pam' 'libelf'
+           'libseccomp' 'util-linux' 'xz' 'pcre2' 'audit')
   provides=('nss-myhostname' "systemd-tools=$pkgver" "udev=$pkgver")
   replaces=('nss-myhostname' 'systemd-tools' 'udev')
   conflicts=('nss-myhostname' 'systemd-tools' 'udev')
@@ -264,7 +250,6 @@ package_systemd-resolvconf() {
 package_systemd-sysvcompat() {
   pkgdesc='sysvinit compat for systemd'
   license=('GPL2')
-  groups=('base')
   conflicts=('sysvinit')
   depends=('systemd')
 
