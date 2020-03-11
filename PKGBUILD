@@ -6,9 +6,9 @@
 
 pkgbase=systemd
 pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
-_tag='b7ed902b2394f94e7f1fbe6c3194b5cd9a9429e6' # git rev-parse v${pkgver}
-pkgver=244.3
-pkgrel=2
+_tag='68fef5d635424a60224cce610d30a9041124c204' # git rev-parse v${pkgver}
+pkgver=245
+pkgrel=3
 arch=('x86_64')
 url='https://www.github.com/systemd/systemd'
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
@@ -16,15 +16,13 @@ makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
              'libmicrohttpd' 'libxslt' 'util-linux' 'linux-api-headers'
              'python-lxml' 'quota-tools' 'shadow' 'gnu-efi-libs' 'git'
              'meson' 'libseccomp' 'pcre2' 'audit' 'kexec-tools' 'libxkbcommon'
-             'bash-completion')
+             'bash-completion' 'p11-kit')
 options=('strip')
 validpgpkeys=('63CDA1E5D3FC22B998D20DD6327F26951A015CC4'  # Lennart Poettering <lennart@poettering.net>
               '5C251B5FC54EB2F80F407AAAC54CA336CFEB557E') # Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl>
 source=("git+https://github.com/systemd/systemd-stable#tag=${_tag}?signed"
         "git+https://github.com/systemd/systemd#tag=v${pkgver%.*}?signed"
         '0001-Use-Manjaro-Linux-device-access-groups.patch'
-        '0002-shutdown-do-not-detach-autoclear-loopback-devices.patch'
-        '0003-shutdown-modernizations-pr-14409.patch'
         'initcpio-hook-udev'
         'initcpio-install-systemd'
         'initcpio-install-udev'
@@ -45,8 +43,6 @@ source=("git+https://github.com/systemd/systemd-stable#tag=${_tag}?signed"
 sha512sums=('SKIP'
             'SKIP'
             'e38c7c422c82953f9c2476a5ab8009d614cbec839e4088bff5db7698ddc84e3d8ed64f32ed323f57b1913c5c9703546f794996cb415ed7cdda930b627962a3c4'
-            '4d390f3ac290b7f5a8e1cb8a2435be67d53f67eac0bd2846fdccd4de44b487710c75ee38d2d9edacbaf31f246328a846930042f3abee8af617ec4cfc6b406bfb'
-            '40791cb4c0b15409c3cf997e998e23017099d9e5f02cbe9d18a32fcbc444973f65d8863fcbbaa9537ac097f00f64df95c23363fa961dd080198863d269aa07ca'
             '1f800fe10d1d1c8b1ff45ae352f84dd1918f5559fbf80338b17d490a581ae5e4895c0b51baee7dac9260f4b6f9965da2fa5d33f2a5e31b1afa6c1aafce3e1e49'
             '01de24951a05d38eca6b615a7645beb3677ca0e0f87638d133649f6dc14dcd2ea82594a60b793c31b14493a286d1d11a0d25617f54dbfa02be237652c8faa691'
             'a25b28af2e8c516c3a2eec4e64b8c7f70c21f974af4a955a4a9d45fd3e3ff0d2a98b4419fe425d47152d5acae77d64e69d8d014a7209524b75a81b0edb10bf3a'
@@ -66,13 +62,14 @@ sha512sums=('SKIP'
             '825b9dd0167c072ba62cabe0677e7cd20f2b4b850328022540f122689d8b25315005fa98ce867cf6e7460b2b26df16b88bb3b5c9ebf721746dce4e2271af7b97')
 
 _backports=(
-  # units: Split modprobing out into a separate service unit
-  '625077264ba01a108386eeea733ee244e6b7ff14'
+  # core: Fix resolution of nested DM devices for cgroups
+  'b7cf4b4ef5d0336443f21809b1506bc4a8aa75a9'
+
+  # analyze: fix table time output
+  '084df9c616fdfbcbf3d7fbe7dc6b975f1fa359d2'
 )
 
 _reverts=(
-  # Support Plugable UD-PRO8 dock
-  '98c03090274a067806090e2974fd2091f8206457'
 )
 
 prepare() {
@@ -93,10 +90,6 @@ prepare() {
 
   # Replace cdrom/dialout/tape groups with optical/uucp/storage
   patch -Np1 -i ../0001-Use-Manjaro-Linux-device-access-groups.patch
-
-  # Fix shutdown crashes (patches by Ubuntu)
-  patch -Np1 -i ../0002-shutdown-do-not-detach-autoclear-loopback-devices.patch
-  patch -Np1 -i ../0003-shutdown-modernizations-pr-14409.patch
 }
 
 build() {
@@ -153,7 +146,7 @@ package_systemd() {
   license=('GPL2' 'LGPL2.1')
   depends=('acl' 'bash' 'cryptsetup' 'dbus' 'iptables' 'kbd' 'kmod' 'hwids' 'libcap'
            'libgcrypt' 'systemd-libs' 'libidn2' 'libidn2.so' 'lz4' 'pam' 'libelf'
-           'libseccomp' 'util-linux' 'xz' 'pcre2' 'audit')
+           'libseccomp' 'util-linux' 'xz' 'pcre2' 'audit' 'libp11-kit')
   provides=('nss-myhostname' "systemd-tools=$pkgver" "udev=$pkgver")
   replaces=('nss-myhostname' 'systemd-tools' 'udev')
   conflicts=('nss-myhostname' 'systemd-tools' 'udev')
