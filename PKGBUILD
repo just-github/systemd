@@ -6,8 +6,8 @@
 
 pkgbase=systemd
 pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
-_tag='7d7a511c7cc0d159b86bacd181b6932556308b82' # git rev-parse v${pkgver}
-pkgver=245.2
+_tag='f4d7fa4807ada3c1b7d6f67117eadbb014b67d2f' # git rev-parse v${pkgver}
+pkgver=245.3
 pkgrel=1
 arch=('x86_64')
 url='https://www.github.com/systemd/systemd'
@@ -64,6 +64,9 @@ sha512sums=('SKIP'
 _backports=(
   # systemd-resolved: use hostname for certificate validation in DoT
   'eec394f10bbfcc3d2fc8504ad8ff5be44231abd5'
+  
+# user-util: Allow names starting with a digit
+  '93c23c9297e48e594785e0bb9c51504aae5fbe3e'
 )
 
 _reverts=(
