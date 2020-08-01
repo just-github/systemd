@@ -6,8 +6,8 @@
 
 pkgbase=systemd
 pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
-_tag='8a8b000d682a7108463c5c74bc876c5658d9de4a' # git rev-parse v${pkgver}
-pkgver=245.7
+_tag='5c68ad14af6c89261f31f0abb4850fb1c99e8cfd' # git rev-parse v${pkgver}
+pkgver=246
 pkgrel=1
 arch=('x86_64')
 url='https://www.github.com/systemd/systemd'
@@ -23,7 +23,6 @@ validpgpkeys=('63CDA1E5D3FC22B998D20DD6327F26951A015CC4'  # Lennart Poettering <
 source=("git+https://github.com/systemd/systemd-stable#tag=${_tag}?signed"
         "git+https://github.com/systemd/systemd#tag=v${pkgver%.*}?signed"
         '0001-Use-Manjaro-Linux-device-access-groups.patch'
-        '0002-make-homed-userdbd-repart-services-installable.patch'
         '0001-fix-systemd-issue-15699.patch'
         'initcpio-hook-udev'
         'initcpio-install-systemd'
@@ -45,7 +44,6 @@ source=("git+https://github.com/systemd/systemd-stable#tag=${_tag}?signed"
 sha512sums=('SKIP'
             'SKIP'
             'e38c7c422c82953f9c2476a5ab8009d614cbec839e4088bff5db7698ddc84e3d8ed64f32ed323f57b1913c5c9703546f794996cb415ed7cdda930b627962a3c4'
-            '85d11bbbb5c10016e4a67eec051315e2e292939844f260bf698018c5bd1c516c28444f635eb15832a23e26891c4beda14bacfa57fdeda45c00f1b653abe3b123'
             '3dd6be816f37ad5b53f9c92fd174563b096d348ff491b11d649c913241bd3c6d8acd40a84819235a190c419fb78981f803fdd598481e20f4a820db6cf0534ebe'
             '1f800fe10d1d1c8b1ff45ae352f84dd1918f5559fbf80338b17d490a581ae5e4895c0b51baee7dac9260f4b6f9965da2fa5d33f2a5e31b1afa6c1aafce3e1e49'
             '80ac350fb4dc58c52d4c1ce77a1f91b8cd64d4c99a1c1e24194acac56f9e4a69b2304b13113e93d38459041fa073fe97840776d99ed7e4ce99aa76a3adb39583'
@@ -66,8 +64,6 @@ sha512sums=('SKIP'
             '825b9dd0167c072ba62cabe0677e7cd20f2b4b850328022540f122689d8b25315005fa98ce867cf6e7460b2b26df16b88bb3b5c9ebf721746dce4e2271af7b97')
 
 _backports=(
-  # systemd-resolved: use hostname for certificate validation in DoT
-  'eec394f10bbfcc3d2fc8504ad8ff5be44231abd5'
 )
 
 _reverts=(
@@ -91,9 +87,6 @@ prepare() {
 
   # Replace cdrom/dialout/tape groups with optical/uucp/storage
   patch -Np1 -i ../0001-Use-Manjaro-Linux-device-access-groups.patch
-
-  # Make homed/userdbd/repart services installable (to allow uninstalling)
-  patch -Np1 -i ../0002-make-homed-userdbd-repart-services-installable.patch
 
   # https://github.com/systemd/systemd/issues/15699
   # https://github.com/systemd/systemd/issues/16076
@@ -192,10 +185,10 @@ package_systemd() {
   mv "$pkgdir"/usr/lib/lib{nss,systemd,udev}*.so* systemd-libs
 
   # manpages shipped with systemd-sysvcompat
-  rm "$pkgdir"/usr/share/man/man8/{halt,poweroff,reboot,runlevel,shutdown,telinit}.8
+  rm "$pkgdir"/usr/share/man/man8/{halt,poweroff,reboot,shutdown}.8
 
   # executable (symlinks) shipped with systemd-sysvcompat
-  rm "$pkgdir"/usr/bin/{halt,init,poweroff,reboot,runlevel,shutdown,telinit}
+  rm "$pkgdir"/usr/bin/{halt,init,poweroff,reboot,shutdown}
 
   # files shipped with systemd-resolvconf
   rm "$pkgdir"/usr/{bin/resolvconf,share/man/man1/resolvconf.1}
@@ -270,11 +263,11 @@ package_systemd-sysvcompat() {
   depends=('systemd')
 
   install -D -m0644 -t "$pkgdir"/usr/share/man/man8 \
-    build/man/{telinit,halt,reboot,poweroff,runlevel,shutdown}.8
+    build/man/{halt,poweroff,reboot,shutdown}.8
 
   install -d -m0755 "$pkgdir"/usr/bin
   ln -s ../lib/systemd/systemd "$pkgdir"/usr/bin/init
-  for tool in runlevel reboot shutdown poweroff halt telinit; do
+    for tool in halt poweroff reboot shutdown; do
     ln -s systemctl "$pkgdir"/usr/bin/$tool
   done
 }
