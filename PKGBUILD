@@ -6,8 +6,8 @@
 
 pkgbase=systemd
 pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
-_tag='f4d7fa4807ada3c1b7d6f67117eadbb014b67d2f' # git rev-parse v${pkgver}
-pkgver=245.3
+_tag='8a8b000d682a7108463c5c74bc876c5658d9de4a' # git rev-parse v${pkgver}
+pkgver=245.7
 pkgrel=1
 arch=('x86_64')
 url='https://www.github.com/systemd/systemd'
@@ -16,13 +16,15 @@ makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
              'libmicrohttpd' 'libxslt' 'util-linux' 'linux-api-headers'
              'python-lxml' 'quota-tools' 'shadow' 'gnu-efi-libs' 'git'
              'meson' 'libseccomp' 'pcre2' 'audit' 'kexec-tools' 'libxkbcommon'
-             'bash-completion' 'p11-kit')
+             'bash-completion' 'p11-kit' 'systemd')
 options=('strip')
 validpgpkeys=('63CDA1E5D3FC22B998D20DD6327F26951A015CC4'  # Lennart Poettering <lennart@poettering.net>
               '5C251B5FC54EB2F80F407AAAC54CA336CFEB557E') # Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl>
 source=("git+https://github.com/systemd/systemd-stable#tag=${_tag}?signed"
         "git+https://github.com/systemd/systemd#tag=v${pkgver%.*}?signed"
         '0001-Use-Manjaro-Linux-device-access-groups.patch'
+        '0002-make-homed-userdbd-repart-services-installable.patch'
+        '0001-fix-systemd-issue-15699.patch'
         'initcpio-hook-udev'
         'initcpio-install-systemd'
         'initcpio-install-udev'
@@ -43,8 +45,10 @@ source=("git+https://github.com/systemd/systemd-stable#tag=${_tag}?signed"
 sha512sums=('SKIP'
             'SKIP'
             'e38c7c422c82953f9c2476a5ab8009d614cbec839e4088bff5db7698ddc84e3d8ed64f32ed323f57b1913c5c9703546f794996cb415ed7cdda930b627962a3c4'
+            '85d11bbbb5c10016e4a67eec051315e2e292939844f260bf698018c5bd1c516c28444f635eb15832a23e26891c4beda14bacfa57fdeda45c00f1b653abe3b123'
+            '3dd6be816f37ad5b53f9c92fd174563b096d348ff491b11d649c913241bd3c6d8acd40a84819235a190c419fb78981f803fdd598481e20f4a820db6cf0534ebe'
             '1f800fe10d1d1c8b1ff45ae352f84dd1918f5559fbf80338b17d490a581ae5e4895c0b51baee7dac9260f4b6f9965da2fa5d33f2a5e31b1afa6c1aafce3e1e49'
-            '01de24951a05d38eca6b615a7645beb3677ca0e0f87638d133649f6dc14dcd2ea82594a60b793c31b14493a286d1d11a0d25617f54dbfa02be237652c8faa691'
+            '80ac350fb4dc58c52d4c1ce77a1f91b8cd64d4c99a1c1e24194acac56f9e4a69b2304b13113e93d38459041fa073fe97840776d99ed7e4ce99aa76a3adb39583'
             'a25b28af2e8c516c3a2eec4e64b8c7f70c21f974af4a955a4a9d45fd3e3ff0d2a98b4419fe425d47152d5acae77d64e69d8d014a7209524b75a81b0edb10bf3a'
             '72dfd0e513e61f391d2b0bf8d9f13c6e2d2732dd7bd52413dccc791c562ab6265062c17d5abe60a42db0775e0b2352eba5e18d14fa2740c176d82edac4867c32'
             '363052706e8fdb040754d0bdc75377212865314ffb8718f8889e6c8a0049ea6cc442cb34fb9a204622eca597b78a547421867cb7517bd1b7342badee581bde7d'
@@ -64,9 +68,6 @@ sha512sums=('SKIP'
 _backports=(
   # systemd-resolved: use hostname for certificate validation in DoT
   'eec394f10bbfcc3d2fc8504ad8ff5be44231abd5'
-  
-# user-util: Allow names starting with a digit
-  '93c23c9297e48e594785e0bb9c51504aae5fbe3e'
 )
 
 _reverts=(
@@ -90,6 +91,13 @@ prepare() {
 
   # Replace cdrom/dialout/tape groups with optical/uucp/storage
   patch -Np1 -i ../0001-Use-Manjaro-Linux-device-access-groups.patch
+
+  # Make homed/userdbd/repart services installable (to allow uninstalling)
+  patch -Np1 -i ../0002-make-homed-userdbd-repart-services-installable.patch
+
+  # https://github.com/systemd/systemd/issues/15699
+  # https://github.com/systemd/systemd/issues/16076
+  patch -Np1 -i ../0001-fix-systemd-issue-15699.patch
 }
 
 build() {
@@ -121,6 +129,7 @@ build() {
     -Ddefault-hierarchy=hybrid
     -Ddefault-kill-user-processes=false
     -Ddefault-locale=C
+    -Ddns-over-tls=openssl
     -Dfallback-hostname='manjaro'
     -Dnologin-path=/usr/bin/nologin
     -Dntp-servers="${_timeservers[*]}"
@@ -144,9 +153,12 @@ check() {
 package_systemd() {
   pkgdesc='system and service manager'
   license=('GPL2' 'LGPL2.1')
-  depends=('acl' 'bash' 'cryptsetup' 'dbus' 'iptables' 'kbd' 'kmod' 'hwids' 'libcap'
-           'libgcrypt' 'systemd-libs' 'libidn2' 'libidn2.so' 'lz4' 'pam' 'libelf'
-           'libseccomp' 'util-linux' 'xz' 'pcre2' 'audit' 'libp11-kit')
+  depends=('acl' 'libacl.so' 'bash' 'cryptsetup' 'libcryptsetup.so' 'dbus'
+           'iptables' 'kbd' 'kmod' 'libkmod.so' 'hwids' 'libcap' 'libcap.so'
+           'libgcrypt' 'systemd-libs' 'libidn2' 'libidn2.so' 'lz4' 'pam'
+           'libelf' 'libseccomp' 'libseccomp.so' 'util-linux' 'libblkid.so'
+           'libmount.so' 'xz' 'pcre2' 'audit' 'libaudit.so' 'libp11-kit'
+           'libp11-kit.so' 'openssl')
   provides=('nss-myhostname' "systemd-tools=$pkgver" "udev=$pkgver")
   replaces=('nss-myhostname' 'systemd-tools' 'udev')
   conflicts=('nss-myhostname' 'systemd-tools' 'udev')
@@ -204,11 +216,10 @@ package_systemd() {
   install -D -m0644 initcpio-install-udev "$pkgdir"/usr/lib/initcpio/install/udev
   install -D -m0644 initcpio-hook-udev "$pkgdir"/usr/lib/initcpio/hooks/udev
 
-  # ensure proper permissions for /var/log/journal
-  # The permissions are stored with named group by tar, so this works with
-  # users and groups populated by systemd-sysusers. This is only to prevent a
-  # warning from pacman as permissions are set by systemd-tmpfiles anyway.
-  install -d -o root -g systemd-journal -m 2755 "$pkgdir"/var/log/journal
+  # The group 'systemd-journal' is allocated dynamically and may have varying
+  # gid on different systems. Let's install with gid 0 (root), systemd-tmpfiles
+  # will fix the permissions for us. (see /usr/lib/tmpfiles.d/systemd.conf)
+  install -d -o root -g root -m 2755 "$pkgdir"/var/log/journal
 
   # match directory owner/group and mode from [extra]/polkit
   install -d -o root -g 102 -m 0750 "$pkgdir"/usr/share/polkit-1/rules.d
