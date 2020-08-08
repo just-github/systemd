@@ -1,13 +1,16 @@
-# Maintainer: Philip Müller <philm@manjaro.org>
-# Maintainer: Bernhard Landauer <bernhard@manjaro.org>
+# Maintainer: Philip Müller <philm[at]manjaro[dot]org>
+# Maintainer: Bernhard Landauer <bernhard[at]manjaro[dot]org>
+# Maintainer: Helmut Stult <helmut[at]manjaro[dot]org>
+
+# Arch credits:
 # Contributor: Christian Hesse <mail@eworm.de>
 # Contributor: Dave Reisner <dreisner@archlinux.org>
 # Contributor: Tom Gundersen <teg@jklm.no>
 
 pkgbase=systemd
 pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
-_tag='5c68ad14af6c89261f31f0abb4850fb1c99e8cfd' # git rev-parse v${pkgver}
-pkgver=246
+_tag='7fb880ddf101b871f68aae0d86db652e2c13c5db' # git rev-parse v${pkgver}
+pkgver=246.1
 pkgrel=1
 arch=('x86_64')
 url='https://www.github.com/systemd/systemd'
@@ -232,7 +235,7 @@ package_systemd() {
 
 package_systemd-libs() {
   pkgdesc='systemd client libraries'
-  depends=('glibc' 'libcap' 'libgcrypt' 'lz4' 'xz')
+  depends=('glibc' 'libcap' 'libgcrypt' 'lz4' 'xz' 'zstd')
   license=('LGPL2.1')
   provides=('libsystemd' 'libsystemd.so' 'libudev.so')
   conflicts=('libsystemd')
