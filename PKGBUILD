@@ -6,8 +6,8 @@
 
 pkgbase=systemd
 pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
-_tag='5c68ad14af6c89261f31f0abb4850fb1c99e8cfd' # git rev-parse v${pkgver}
-pkgver=246
+_tag='7fb880ddf101b871f68aae0d86db652e2c13c5db' # git rev-parse v${pkgver}
+pkgver=246.1
 pkgrel=1
 arch=('x86_64')
 url='https://www.github.com/systemd/systemd'
@@ -16,7 +16,7 @@ makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
              'libmicrohttpd' 'libxslt' 'util-linux' 'linux-api-headers'
              'python-lxml' 'quota-tools' 'shadow' 'gnu-efi-libs' 'git'
              'meson' 'libseccomp' 'pcre2' 'audit' 'kexec-tools' 'libxkbcommon'
-             'bash-completion' 'p11-kit' 'systemd')
+             'bash-completion' 'p11-kit' 'systemd' 'zstd')
 options=('strip')
 validpgpkeys=('63CDA1E5D3FC22B998D20DD6327F26951A015CC4'  # Lennart Poettering <lennart@poettering.net>
               '5C251B5FC54EB2F80F407AAAC54CA336CFEB557E') # Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl>
@@ -232,7 +232,7 @@ package_systemd() {
 
 package_systemd-libs() {
   pkgdesc='systemd client libraries'
-  depends=('glibc' 'libcap' 'libgcrypt' 'lz4' 'xz')
+  depends=('glibc' 'libcap' 'libgcrypt' 'lz4' 'xz' 'zstd')
   license=('LGPL2.1')
   provides=('libsystemd' 'libsystemd.so' 'libudev.so')
   conflicts=('libsystemd')
@@ -267,7 +267,7 @@ package_systemd-sysvcompat() {
 
   install -d -m0755 "$pkgdir"/usr/bin
   ln -s ../lib/systemd/systemd "$pkgdir"/usr/bin/init
-    for tool in halt poweroff reboot shutdown; do
+  for tool in halt poweroff reboot shutdown; do
     ln -s systemctl "$pkgdir"/usr/bin/$tool
   done
 }
