@@ -11,7 +11,7 @@ pkgbase=systemd
 pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
 _tag='b5ca06f13739f6fae3b73ccfc89d1e4d152329a2' # git rev-parse v${pkgver}
 pkgver=246.3
-pkgrel=1
+pkgrel=2
 arch=('x86_64')
 url='https://www.github.com/systemd/systemd'
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
@@ -134,7 +134,7 @@ build() {
     -Dsysvinit-path=
     -Dsysvrcnd-path=
     -Dapparmor=false
-    -Dsupport-url='https://forum.manjaro.org/c/technical-issues-and-assistance'
+    -Dsupport-url='https://forum.manjaro.org/c/support'
   )
 
   arch-meson "$pkgbase-stable" build "${_meson_options[@]}"
