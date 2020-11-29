@@ -69,10 +69,13 @@ add_systemd_unit() {
                 map add_systemd_unit "${values[@]}"
                 ;;
             Exec*)
-                # don't add binaries unless they are required
-                if [[ ${values[0]:0:1} != '-' ]]; then
-                    add_binary "${values[0]}"
-                fi
+                # do not add binaries unless they are required,
+                # strip special executable prefixes
+                case ${values[0]} in
+                    -*)  ;;
+                    !!*) add_binary "${values[0]#!!}" ;;
+                    *)   add_binary "${values[0]#[@!:+]}" ;;
+                esac
                 ;;
         esac
 
@@ -103,11 +106,11 @@ add_systemd_drop_in() {
 build() {
     local rules unit
 
-    # from base
-    add_binary /bin/mount
     add_binary /usr/bin/kmod /usr/bin/modprobe
-    add_binary /usr/lib/systemd/systemd /init
+    add_binary /usr/bin/mount
     add_binary /usr/bin/sulogin
+    add_binary /usr/bin/umount
+    add_binary /usr/lib/systemd/systemd /init
 
     map add_binary \
         /usr/bin/journalctl \
@@ -190,5 +193,3 @@ wish to still include the 'base' hook (before this hook) to ensure that a
 rescue shell exists on your initramfs.
 HELPEOF
 }
-
-# vim: set ft=sh ts=4 sw=4 et:

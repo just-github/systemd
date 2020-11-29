@@ -11,7 +11,7 @@ pkgbase=systemd
 pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
 _tag='ddbbb1a91461e173fba2677466007ee1508184af' # git rev-parse v${pkgver}
 pkgver=247
-pkgrel=1
+pkgrel=2
 arch=('x86_64')
 url='https://www.github.com/systemd/systemd'
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
@@ -49,7 +49,7 @@ sha512sums=('SKIP'
             'e38c7c422c82953f9c2476a5ab8009d614cbec839e4088bff5db7698ddc84e3d8ed64f32ed323f57b1913c5c9703546f794996cb415ed7cdda930b627962a3c4'
             '3dd6be816f37ad5b53f9c92fd174563b096d348ff491b11d649c913241bd3c6d8acd40a84819235a190c419fb78981f803fdd598481e20f4a820db6cf0534ebe'
             '1f800fe10d1d1c8b1ff45ae352f84dd1918f5559fbf80338b17d490a581ae5e4895c0b51baee7dac9260f4b6f9965da2fa5d33f2a5e31b1afa6c1aafce3e1e49'
-            '80ac350fb4dc58c52d4c1ce77a1f91b8cd64d4c99a1c1e24194acac56f9e4a69b2304b13113e93d38459041fa073fe97840776d99ed7e4ce99aa76a3adb39583'
+            '5cffd9aa55e59eb92277413458eeb16c79c0d7e71fb5a976b25a115d616caf7a0af966ffa093fa7d3128ce4acf3eb1fe6edcd6d82dba4c54dddc466c2f0b9023'
             'a25b28af2e8c516c3a2eec4e64b8c7f70c21f974af4a955a4a9d45fd3e3ff0d2a98b4419fe425d47152d5acae77d64e69d8d014a7209524b75a81b0edb10bf3a'
             '72dfd0e513e61f391d2b0bf8d9f13c6e2d2732dd7bd52413dccc791c562ab6265062c17d5abe60a42db0775e0b2352eba5e18d14fa2740c176d82edac4867c32'
             '363052706e8fdb040754d0bdc75377212865314ffb8718f8889e6c8a0049ea6cc442cb34fb9a204622eca597b78a547421867cb7517bd1b7342badee581bde7d'
@@ -74,6 +74,9 @@ _backports=(
   )
 
 _reverts=(
+  # https://bugs.archlinux.org/task/68776
+  # core: serialize u->pids until the processes have been moved to the scope cgroup
+  '428a9f6f1d0396b9eacde2b38d667cbe3f15eb55'
 )
 
 prepare() {
