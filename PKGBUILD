@@ -9,9 +9,9 @@
 
 pkgbase=systemd
 pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
-_tag='ddbbb1a91461e173fba2677466007ee1508184af' # git rev-parse v${pkgver}
-pkgver=247
-pkgrel=2
+_tag='dcc360e35ecdeadfeaf8441628cfebb452acd59b' # git rev-parse v${pkgver}
+pkgver=247.1
+pkgrel=1
 arch=('x86_64')
 url='https://www.github.com/systemd/systemd'
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
@@ -19,14 +19,13 @@ makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
              'libmicrohttpd' 'libxcrypt' 'libxslt' 'util-linux' 'linux-api-headers'
              'python-lxml' 'quota-tools' 'shadow' 'gnu-efi-libs' 'git'
              'meson' 'libseccomp' 'pcre2' 'audit' 'kexec-tools' 'libxkbcommon'
-             'bash-completion' 'p11-kit' 'systemd' 'zstd')
+             'bash-completion' 'p11-kit' 'systemd')
 options=('strip')
 validpgpkeys=('63CDA1E5D3FC22B998D20DD6327F26951A015CC4'  # Lennart Poettering <lennart@poettering.net>
               '5C251B5FC54EB2F80F407AAAC54CA336CFEB557E') # Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl>
 source=("git+https://github.com/systemd/systemd-stable#tag=${_tag}?signed"
         "git+https://github.com/systemd/systemd#tag=v${pkgver%.*}?signed"
         '0001-Use-Manjaro-Linux-device-access-groups.patch'
-        '0001-fix-systemd-issue-15699.patch'
         'initcpio-hook-udev'
         'initcpio-install-systemd'
         'initcpio-install-udev'
@@ -47,7 +46,6 @@ source=("git+https://github.com/systemd/systemd-stable#tag=${_tag}?signed"
 sha512sums=('SKIP'
             'SKIP'
             'e38c7c422c82953f9c2476a5ab8009d614cbec839e4088bff5db7698ddc84e3d8ed64f32ed323f57b1913c5c9703546f794996cb415ed7cdda930b627962a3c4'
-            '3dd6be816f37ad5b53f9c92fd174563b096d348ff491b11d649c913241bd3c6d8acd40a84819235a190c419fb78981f803fdd598481e20f4a820db6cf0534ebe'
             '1f800fe10d1d1c8b1ff45ae352f84dd1918f5559fbf80338b17d490a581ae5e4895c0b51baee7dac9260f4b6f9965da2fa5d33f2a5e31b1afa6c1aafce3e1e49'
             '5cffd9aa55e59eb92277413458eeb16c79c0d7e71fb5a976b25a115d616caf7a0af966ffa093fa7d3128ce4acf3eb1fe6edcd6d82dba4c54dddc466c2f0b9023'
             'a25b28af2e8c516c3a2eec4e64b8c7f70c21f974af4a955a4a9d45fd3e3ff0d2a98b4419fe425d47152d5acae77d64e69d8d014a7209524b75a81b0edb10bf3a'
@@ -67,16 +65,9 @@ sha512sums=('SKIP'
             '825b9dd0167c072ba62cabe0677e7cd20f2b4b850328022540f122689d8b25315005fa98ce867cf6e7460b2b26df16b88bb3b5c9ebf721746dce4e2271af7b97')
 
 _backports=(
-  # home: fix homed.conf install location
-  '72a4466e6e80693f4455c0c5edf946f8a440845a'
-  # oom: fix oomd.conf install location
-  '2bb703e440c844162cc258dfa0385c33d7bc32b3'
-  )
+)
 
 _reverts=(
-  # https://bugs.archlinux.org/task/68776
-  # core: serialize u->pids until the processes have been moved to the scope cgroup
-  '428a9f6f1d0396b9eacde2b38d667cbe3f15eb55'
 )
 
 prepare() {
@@ -97,10 +88,6 @@ prepare() {
 
   # Replace cdrom/dialout/tape groups with optical/uucp/storage
   patch -Np1 -i ../0001-Use-Manjaro-Linux-device-access-groups.patch
-
-  # https://github.com/systemd/systemd/issues/15699
-  # https://github.com/systemd/systemd/issues/16076
-  patch -Np1 -i ../0001-fix-systemd-issue-15699.patch
 }
 
 build() {
@@ -121,6 +108,7 @@ build() {
 
   local _meson_options=(
     -Dversion-tag="${pkgver}-${pkgrel}-manjaro"
+    -Dmode=release
 
     -Dgnu-efi=true
     -Dima=false
@@ -128,7 +116,11 @@ build() {
     -Dlz4=true
     -Dman=true
 
+    # We disable DNSSEC by default, it still causes trouble:
+    # https://github.com/systemd/systemd/issues/10579
+    
     -Ddbuspolicydir=/usr/share/dbus-1/system.d
+    -Ddefault-dnssec=no
     -Ddefault-hierarchy=hybrid
     -Ddefault-kill-user-processes=false
     -Ddefault-locale=C
@@ -158,7 +150,7 @@ package_systemd() {
   license=('GPL2' 'LGPL2.1')
   depends=('acl' 'libacl.so' 'bash' 'cryptsetup' 'libcryptsetup.so' 'dbus'
            'iptables' 'kbd' 'kmod' 'libkmod.so' 'hwids' 'libcap' 'libcap.so'
-           'libgcrypt' 'libxcrypt' 'libcrypt.so' 'systemd-libs' 'libidn2' 'libidn2.so' 'lz4' 'pam'
+           'libgcrypt' 'libxcrypt' 'libcrypt.so' 'systemd-libs' 'libidn2' 'lz4' 'pam'
            'libelf' 'libseccomp' 'libseccomp.so' 'util-linux' 'libblkid.so'
            'libmount.so' 'xz' 'pcre2' 'audit' 'libaudit.so' 'libp11-kit'
            'libp11-kit.so' 'openssl')
@@ -178,7 +170,6 @@ package_systemd() {
           etc/systemd/journal-upload.conf
           etc/systemd/logind.conf
           etc/systemd/networkd.conf
-          etc/systemd/oomd.conf
           etc/systemd/pstore.conf
           etc/systemd/resolved.conf
           etc/systemd/sleep.conf
@@ -197,7 +188,7 @@ package_systemd() {
   install -d -m0755 systemd-libs
   mv "$pkgdir"/usr/lib/lib{nss,systemd,udev}*.so* systemd-libs
 
-  # manpages shipped with systemd-sysvcompat#
+  # manpages shipped with systemd-sysvcompat
   rm "$pkgdir"/usr/share/man/man8/{halt,poweroff,reboot,shutdown}.8
 
   # executable (symlinks) shipped with systemd-sysvcompat
@@ -284,5 +275,3 @@ package_systemd-sysvcompat() {
     ln -s systemctl "$pkgdir"/usr/bin/$tool
   done
 }
-
-# vim:ft=sh syn=sh et sw=2:
