@@ -11,7 +11,7 @@ pkgbase=systemd
 pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
 _tag='f948f652768a5279087e13961ebb87f345626e2e' # git rev-parse v${pkgver}
 pkgver=247.4
-pkgrel=2
+pkgrel=1
 arch=('x86_64')
 url='https://www.github.com/systemd/systemd'
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
@@ -25,6 +25,7 @@ validpgpkeys=('63CDA1E5D3FC22B998D20DD6327F26951A015CC4'  # Lennart Poettering <
               '5C251B5FC54EB2F80F407AAAC54CA336CFEB557E') # Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl>
 source=("git+https://github.com/systemd/systemd-stable#tag=${_tag}?signed"
         "git+https://github.com/systemd/systemd#tag=v${pkgver%.*}?signed"
+        'https://patch-diff.githubusercontent.com/raw/systemd/systemd-stable/pull/97.patch'
         '0001-Use-Manjaro-Linux-device-access-groups.patch'
         'initcpio-hook-udev'
         'initcpio-install-systemd'
@@ -45,6 +46,7 @@ source=("git+https://github.com/systemd/systemd-stable#tag=${_tag}?signed"
         '30-systemd-update.hook')
 sha512sums=('SKIP'
             'SKIP'
+            '6c8d8b016d1ad56e0bb050782cb3974288ced78d954e540df9bd7de23e895a9967713261f874a859975b56a950615c4ce51ce9feef3b27b4fa3f9c271ce011c2'
             'e38c7c422c82953f9c2476a5ab8009d614cbec839e4088bff5db7698ddc84e3d8ed64f32ed323f57b1913c5c9703546f794996cb415ed7cdda930b627962a3c4'
             '1f800fe10d1d1c8b1ff45ae352f84dd1918f5559fbf80338b17d490a581ae5e4895c0b51baee7dac9260f4b6f9965da2fa5d33f2a5e31b1afa6c1aafce3e1e49'
             '5cffd9aa55e59eb92277413458eeb16c79c0d7e71fb5a976b25a115d616caf7a0af966ffa093fa7d3128ce4acf3eb1fe6edcd6d82dba4c54dddc466c2f0b9023'
@@ -87,6 +89,9 @@ prepare() {
     git log --oneline -1 "${_c}"
     git revert -n "${_c}"
   done
+  
+  # boot: Move console declarations to missing_efi.h
+  patch -Np1 -i ../97.patch
 
   # Replace cdrom/dialout/tape groups with optical/uucp/storage
   patch -Np1 -i ../0001-Use-Manjaro-Linux-device-access-groups.patch
