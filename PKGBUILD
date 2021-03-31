@@ -9,8 +9,9 @@
 
 pkgbase=systemd
 pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
-_tag='f948f652768a5279087e13961ebb87f345626e2e' # git rev-parse v${pkgver}
-pkgver=247.4
+_tag='e13126bd95857eb9344e030edbb4c603aab63884' # git rev-parse v${_tag_name}
+_tag_name=248
+pkgver="${_tag_name/-/}"
 pkgrel=1
 arch=('x86_64')
 url='https://www.github.com/systemd/systemd'
@@ -19,14 +20,14 @@ makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
              'libmicrohttpd' 'libxcrypt' 'libxslt' 'util-linux' 'linux-api-headers'
              'python-lxml' 'quota-tools' 'shadow' 'gnu-efi-libs' 'git'
              'meson' 'libseccomp' 'pcre2' 'audit' 'kexec-tools' 'libxkbcommon'
-             'bash-completion' 'p11-kit' 'systemd')
+             'bash-completion' 'p11-kit' 'systemd' 'libfido2')
 options=('strip')
 validpgpkeys=('63CDA1E5D3FC22B998D20DD6327F26951A015CC4'  # Lennart Poettering <lennart@poettering.net>
               '5C251B5FC54EB2F80F407AAAC54CA336CFEB557E') # Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl>
 source=("git+https://github.com/systemd/systemd-stable#tag=${_tag}?signed"
-        "git+https://github.com/systemd/systemd#tag=v${pkgver%.*}?signed"
-        'https://patch-diff.githubusercontent.com/raw/systemd/systemd-stable/pull/97.patch'
+        "git+https://github.com/systemd/systemd#tag=v${_tag_name%.*}?signed"
         '0001-Use-Manjaro-Linux-device-access-groups.patch'
+        '0002-Disable-SYSTEMD_URLIFY-by-default.patch'
         'initcpio-hook-udev'
         'initcpio-install-systemd'
         'initcpio-install-udev'
@@ -46,10 +47,10 @@ source=("git+https://github.com/systemd/systemd-stable#tag=${_tag}?signed"
         '30-systemd-update.hook')
 sha512sums=('SKIP'
             'SKIP'
-            '6c8d8b016d1ad56e0bb050782cb3974288ced78d954e540df9bd7de23e895a9967713261f874a859975b56a950615c4ce51ce9feef3b27b4fa3f9c271ce011c2'
-            'e38c7c422c82953f9c2476a5ab8009d614cbec839e4088bff5db7698ddc84e3d8ed64f32ed323f57b1913c5c9703546f794996cb415ed7cdda930b627962a3c4'
+            '882e486b6d88c8bafc50088845e41a49686e98981967f72ca1fb4ef07a01767400632f4b648fd31857d2a2a24a8fd65bcc2a8983284dd4fff2380732741d4c41'
+            '313f3d6cc3d88f718509007e029213a82d84b196afdadc6ef560580acf70ab480aaecd7622f51726cc1af7d7841c6ec5390f72890b055a54fc74722341395651'
             '1f800fe10d1d1c8b1ff45ae352f84dd1918f5559fbf80338b17d490a581ae5e4895c0b51baee7dac9260f4b6f9965da2fa5d33f2a5e31b1afa6c1aafce3e1e49'
-            '5cffd9aa55e59eb92277413458eeb16c79c0d7e71fb5a976b25a115d616caf7a0af966ffa093fa7d3128ce4acf3eb1fe6edcd6d82dba4c54dddc466c2f0b9023'
+            'f970b9edcea7ad45dec5173bdac66d06998b68740aec5da27586afc3c7e4c966b181e1d0c417f404289a4297ac29d96e257bcd7a4bead6a44463d673673b16f2'
             'a25b28af2e8c516c3a2eec4e64b8c7f70c21f974af4a955a4a9d45fd3e3ff0d2a98b4419fe425d47152d5acae77d64e69d8d014a7209524b75a81b0edb10bf3a'
             '72dfd0e513e61f391d2b0bf8d9f13c6e2d2732dd7bd52413dccc791c562ab6265062c17d5abe60a42db0775e0b2352eba5e18d14fa2740c176d82edac4867c32'
             '363052706e8fdb040754d0bdc75377212865314ffb8718f8889e6c8a0049ea6cc442cb34fb9a204622eca597b78a547421867cb7517bd1b7342badee581bde7d'
@@ -70,8 +71,6 @@ _backports=(
 )
 
 _reverts=(
-  # resolved: gracefully handle with packets with too large RR count
-  'fdfffdaf20a18a50c9a6d858359cf4af6d2f4c8b'
 )
 
 prepare() {
@@ -89,12 +88,12 @@ prepare() {
     git log --oneline -1 "${_c}"
     git revert -n "${_c}"
   done
-  
-  # boot: Move console declarations to missing_efi.h
-  patch -Np1 -i ../97.patch
 
   # Replace cdrom/dialout/tape groups with optical/uucp/storage
   patch -Np1 -i ../0001-Use-Manjaro-Linux-device-access-groups.patch
+
+  # https://github.com/gwsw/less/issues/140
+  patch -Np1 -i ../0002-Disable-SYSTEMD_URLIFY-by-default.patch
 }
 
 build() {
@@ -128,9 +127,10 @@ build() {
     
     -Ddbuspolicydir=/usr/share/dbus-1/system.d
     -Ddefault-dnssec=no
-    -Ddefault-hierarchy=hybrid
+    -Ddefault-hierarchy=unified
     -Ddefault-kill-user-processes=false
     -Ddefault-locale=C
+    -Dlocalegen-path=/usr/bin/locale-gen
     -Ddns-over-tls=openssl
     -Dfallback-hostname='manjaro'
     -Dnologin-path=/usr/bin/nologin
@@ -168,7 +168,8 @@ package_systemd() {
               'quota-tools: kernel-level quota management'
               'systemd-sysvcompat: symlink package to provide sysvinit binaries'
               'polkit: allow administration as unprivileged user'
-              'curl: machinectl pull-tar and pull-raw')
+              'curl: machinectl pull-tar and pull-raw'
+              'libfido2: unlocking LUKS2 volumes')
   backup=(etc/pam.d/systemd-user
           etc/systemd/coredump.conf
           etc/systemd/homed.conf
@@ -177,6 +178,7 @@ package_systemd() {
           etc/systemd/journal-upload.conf
           etc/systemd/logind.conf
           etc/systemd/networkd.conf
+          etc/systemd/oomd.conf
           etc/systemd/pstore.conf
           etc/systemd/resolved.conf
           etc/systemd/sleep.conf
@@ -243,7 +245,7 @@ package_systemd() {
 
 package_systemd-libs() {
   pkgdesc='systemd client libraries'
-  depends=('glibc' 'libcap' 'libgcrypt' 'lz4' 'xz' 'zstd')
+  depends=('glibc' 'libcap' 'libgcrypt' 'libp11-kit' 'lz4' 'xz' 'zstd')
   license=('LGPL2.1')
   provides=('libsystemd' 'libsystemd.so' 'libudev.so')
   conflicts=('libsystemd')
