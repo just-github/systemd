@@ -12,7 +12,7 @@ pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
 _tag='e13126bd95857eb9344e030edbb4c603aab63884' # git rev-parse v${_tag_name}
 _tag_name=248
 pkgver="${_tag_name/-/}"
-pkgrel=1
+pkgrel=2
 arch=('x86_64')
 url='https://www.github.com/systemd/systemd'
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
@@ -20,7 +20,7 @@ makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
              'libmicrohttpd' 'libxcrypt' 'libxslt' 'util-linux' 'linux-api-headers'
              'python-lxml' 'quota-tools' 'shadow' 'gnu-efi-libs' 'git'
              'meson' 'libseccomp' 'pcre2' 'audit' 'kexec-tools' 'libxkbcommon'
-             'bash-completion' 'p11-kit' 'systemd' 'libfido2')
+             'bash-completion' 'p11-kit' 'systemd' 'libfido2' 'tpm2-tss')
 options=('strip')
 validpgpkeys=('63CDA1E5D3FC22B998D20DD6327F26951A015CC4'  # Lennart Poettering <lennart@poettering.net>
               '5C251B5FC54EB2F80F407AAAC54CA336CFEB557E') # Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl>
@@ -50,7 +50,7 @@ sha512sums=('SKIP'
             '882e486b6d88c8bafc50088845e41a49686e98981967f72ca1fb4ef07a01767400632f4b648fd31857d2a2a24a8fd65bcc2a8983284dd4fff2380732741d4c41'
             '313f3d6cc3d88f718509007e029213a82d84b196afdadc6ef560580acf70ab480aaecd7622f51726cc1af7d7841c6ec5390f72890b055a54fc74722341395651'
             '1f800fe10d1d1c8b1ff45ae352f84dd1918f5559fbf80338b17d490a581ae5e4895c0b51baee7dac9260f4b6f9965da2fa5d33f2a5e31b1afa6c1aafce3e1e49'
-            'f970b9edcea7ad45dec5173bdac66d06998b68740aec5da27586afc3c7e4c966b181e1d0c417f404289a4297ac29d96e257bcd7a4bead6a44463d673673b16f2'
+            '27d0fe93bbf5c5a931806ba9feffbd60b89f66a1a8aefc5094595053b72c57a45192105781029de0cff9943cb30a5e69ed7d1438d2cb4c1c97c96a6017de5f52'
             'a25b28af2e8c516c3a2eec4e64b8c7f70c21f974af4a955a4a9d45fd3e3ff0d2a98b4419fe425d47152d5acae77d64e69d8d014a7209524b75a81b0edb10bf3a'
             '72dfd0e513e61f391d2b0bf8d9f13c6e2d2732dd7bd52413dccc791c562ab6265062c17d5abe60a42db0775e0b2352eba5e18d14fa2740c176d82edac4867c32'
             '363052706e8fdb040754d0bdc75377212865314ffb8718f8889e6c8a0049ea6cc442cb34fb9a204622eca597b78a547421867cb7517bd1b7342badee581bde7d'
@@ -169,7 +169,8 @@ package_systemd() {
               'systemd-sysvcompat: symlink package to provide sysvinit binaries'
               'polkit: allow administration as unprivileged user'
               'curl: machinectl pull-tar and pull-raw'
-              'libfido2: unlocking LUKS2 volumes')
+              'libfido2: unlocking LUKS2 volumes'
+              'tpm2-tss: unlocking LUKS2 volumes')
   backup=(etc/pam.d/systemd-user
           etc/systemd/coredump.conf
           etc/systemd/homed.conf
