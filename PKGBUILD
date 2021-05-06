@@ -9,10 +9,10 @@
 
 pkgbase=systemd
 pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
-_tag='e13126bd95857eb9344e030edbb4c603aab63884' # git rev-parse v${_tag_name}
-_tag_name=248
+_tag='6d996568a7816bf2651b3d8e67bcc1a4971dbe88' # git rev-parse v${_tag_name}
+_tag_name=248.1
 pkgver="${_tag_name/-/}"
-pkgrel=5
+pkgrel=1
 arch=('x86_64')
 url='https://www.github.com/systemd/systemd'
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
@@ -27,7 +27,6 @@ validpgpkeys=('63CDA1E5D3FC22B998D20DD6327F26951A015CC4'  # Lennart Poettering <
 source=("git+https://github.com/systemd/systemd-stable#tag=${_tag}?signed"
         "git+https://github.com/systemd/systemd#tag=v${_tag_name%.*}?signed"
         '0001-Use-Manjaro-Linux-device-access-groups.patch'
-        '0002-Disable-SYSTEMD_URLIFY-by-default.patch'
         '0003-PARTIAL-REVERT-commit-tree-wide-replace-strverscmp-and-str_verscmp-with-strverscmp_improved.patch'
         'initcpio-hook-udev'
         'initcpio-install-systemd'
@@ -49,7 +48,6 @@ source=("git+https://github.com/systemd/systemd-stable#tag=${_tag}?signed"
 sha512sums=('SKIP'
             'SKIP'
             '882e486b6d88c8bafc50088845e41a49686e98981967f72ca1fb4ef07a01767400632f4b648fd31857d2a2a24a8fd65bcc2a8983284dd4fff2380732741d4c41'
-            '313f3d6cc3d88f718509007e029213a82d84b196afdadc6ef560580acf70ab480aaecd7622f51726cc1af7d7841c6ec5390f72890b055a54fc74722341395651'
             '34541f1967536524329867f9f341f8d9250d9d771c60dc3e6a22ccb82fc01f103cfd3f9903329777591ccbecd2446622a5d6b3804fa0411482b85c70593ee8ad'
             '1f800fe10d1d1c8b1ff45ae352f84dd1918f5559fbf80338b17d490a581ae5e4895c0b51baee7dac9260f4b6f9965da2fa5d33f2a5e31b1afa6c1aafce3e1e49'
             'fc83381c56179dfb4166815e453454046a9eb87291e00ff3163974c28f6d0bf0b555f9beb48e14a21da6d142e9b38bd81a12ea6f411a39304405a27dcc26a236'
@@ -94,9 +92,6 @@ prepare() {
   # Replace cdrom/dialout/tape groups with optical/uucp/storage
   patch -Np1 -i ../0001-Use-Manjaro-Linux-device-access-groups.patch
 
-  # https://github.com/gwsw/less/issues/140
-  patch -Np1 -i ../0002-Disable-SYSTEMD_URLIFY-by-default.patch
-  
   # https://bugs.archlinux.org/task/70264
   # https://github.com/systemd/systemd/issues/19191
   patch -Np1 -i ../0003-PARTIAL-REVERT-commit-tree-wide-replace-strverscmp-and-str_verscmp-with-strverscmp_improved.patch
