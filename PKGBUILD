@@ -12,7 +12,7 @@ pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
 _tag='b134c9cc4b02eddca2ea098324369018123fdf15' # git rev-parse v${_tag_name}
 _tag_name=249
 pkgver="${_tag_name/-/}"
-pkgrel=1
+pkgrel=2
 arch=('x86_64')
 url='https://www.github.com/systemd/systemd'
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
@@ -48,7 +48,7 @@ source=("git+https://github.com/systemd/systemd-stable#tag=${_tag}?signed"
         '30-systemd-update.hook')
 sha512sums=('SKIP'
             'SKIP'
-            '882e486b6d88c8bafc50088845e41a49686e98981967f72ca1fb4ef07a01767400632f4b648fd31857d2a2a24a8fd65bcc2a8983284dd4fff2380732741d4c41'
+            '10f3b477527ec263cc6465c84d94416e356435930edc9e26844a0fd4f71e87a27fa0f91ce24b43a22cacdd2ead5e760e9d607369bc537a8da8d34021302a89a1'
             '34541f1967536524329867f9f341f8d9250d9d771c60dc3e6a22ccb82fc01f103cfd3f9903329777591ccbecd2446622a5d6b3804fa0411482b85c70593ee8ad'
             '1f800fe10d1d1c8b1ff45ae352f84dd1918f5559fbf80338b17d490a581ae5e4895c0b51baee7dac9260f4b6f9965da2fa5d33f2a5e31b1afa6c1aafce3e1e49'
             'fc83381c56179dfb4166815e453454046a9eb87291e00ff3163974c28f6d0bf0b555f9beb48e14a21da6d142e9b38bd81a12ea6f411a39304405a27dcc26a236'
@@ -115,7 +115,9 @@ build() {
   )
 
   local _meson_options=(
-    -Dversion-tag="${pkgver}-${pkgrel}-manjaro"
+    # internal version comparison is incompatible with pacman:
+    #   249~rc1 < 249 < 249.1 < 249rc
+    -Dversion-tag="${_tag_name/-/\~}-${pkgrel}-manjaro"
     -Dmode=release
 
     -Dgnu-efi=true
@@ -126,7 +128,7 @@ build() {
 
     # We disable DNSSEC by default, it still causes trouble:
     # https://github.com/systemd/systemd/issues/10579
-    
+
     -Ddbuspolicydir=/usr/share/dbus-1/system.d
     -Ddefault-dnssec=no
     -Ddefault-hierarchy=unified
@@ -141,6 +143,13 @@ build() {
     -Drpmmacrosdir=no
     -Dsysvinit-path=
     -Dsysvrcnd-path=
+
+    -Dsbat-distro='manjaro'
+    -Dsbat-distro-summary='Manjaro Linux'
+    -Dsbat-distro-pkgname="${pkgname}"
+    -Dsbat-distro-version="${pkgver}"
+#    next line work only for Arch Linux
+#    -Dsbat-distro-url="https://archlinux.org/packages/core/x86_64/${pkgname}/"
     -Dapparmor=false
     -Dsupport-url='https://forum.manjaro.org/c/support'
   )
