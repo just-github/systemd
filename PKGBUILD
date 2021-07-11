@@ -9,7 +9,7 @@
 
 pkgbase=systemd
 pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
-_tag='b134c9cc4b02eddca2ea098324369018123fdf15' # git rev-parse v${_tag_name}
+_tag='b134c9cc4b02eddca2ea098324369018123fdf15'  # git rev-parse v${_tag_name}
 _tag_name=249
 pkgver="${_tag_name/-/}"
 pkgrel=2
