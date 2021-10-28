@@ -1,6 +1,6 @@
 # Maintainer: Philip Müller <philm[at]manjaro[dot]org>
 # Maintainer: Bernhard Landauer <bernhard[at]manjaro[dot]org>
-# Maintainer: Helmut Stult <helmut[at]manjaro[dot]org>
+# Contributor: Helmut Stult
 
 # Arch credits:
 # Maintainer: Christian Hesse <mail@eworm.de>
@@ -12,7 +12,7 @@ pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
 _tag='f1d37a5c491d85255e9996960dc2889a15022b78' # git rev-parse v${_tag_name}
 _tag_name=249.5
 pkgver="${_tag_name/-/}"
-pkgrel=1
+pkgrel=3
 arch=('x86_64')
 url='https://www.github.com/systemd/systemd'
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
@@ -50,9 +50,9 @@ sha512sums=('SKIP'
             'SKIP'
             '10f3b477527ec263cc6465c84d94416e356435930edc9e26844a0fd4f71e87a27fa0f91ce24b43a22cacdd2ead5e760e9d607369bc537a8da8d34021302a89a1'
             '34541f1967536524329867f9f341f8d9250d9d771c60dc3e6a22ccb82fc01f103cfd3f9903329777591ccbecd2446622a5d6b3804fa0411482b85c70593ee8ad'
-            '1f800fe10d1d1c8b1ff45ae352f84dd1918f5559fbf80338b17d490a581ae5e4895c0b51baee7dac9260f4b6f9965da2fa5d33f2a5e31b1afa6c1aafce3e1e49'
-            'fc83381c56179dfb4166815e453454046a9eb87291e00ff3163974c28f6d0bf0b555f9beb48e14a21da6d142e9b38bd81a12ea6f411a39304405a27dcc26a236'
-            'a25b28af2e8c516c3a2eec4e64b8c7f70c21f974af4a955a4a9d45fd3e3ff0d2a98b4419fe425d47152d5acae77d64e69d8d014a7209524b75a81b0edb10bf3a'
+            'f0d933e8c6064ed830dec54049b0a01e27be87203208f6ae982f10fb4eddc7258cb2919d594cbfb9a33e74c3510cfd682f3416ba8e804387ab87d1a217eb4b73'
+            '77582416df858e34bc05a9928ddacbe506d24946576cb7c08c7131cf2a9e059d8ff80b226684fc942bca2edf0c6d2584fa3e22939284b102b30395450784c4d3'
+            '8af5d7b1553be0cc193440dbb94683c2d2d777634dac4369716d75a1b2c2564551c836f3aee8220edfa5ef59122dea737bfe60c588637249bf67e15dba0534d0'
             '72dfd0e513e61f391d2b0bf8d9f13c6e2d2732dd7bd52413dccc791c562ab6265062c17d5abe60a42db0775e0b2352eba5e18d14fa2740c176d82edac4867c32'
             '363052706e8fdb040754d0bdc75377212865314ffb8718f8889e6c8a0049ea6cc442cb34fb9a204622eca597b78a547421867cb7517bd1b7342badee581bde7d'
             '6200f2844bdcd230ef4efd27313a92b663a199fe7b3cf1794d17ca4d62bb2d7e9856e6a6e2ea0b912955df124c9d97374c70ae4ef2ff092b25296769fe9e8ba7'
@@ -69,6 +69,11 @@ sha512sums=('SKIP'
             '825b9dd0167c072ba62cabe0677e7cd20f2b4b850328022540f122689d8b25315005fa98ce867cf6e7460b2b26df16b88bb3b5c9ebf721746dce4e2271af7b97')
 
 _backports=(
+  # coredumpctl: stop truncating information about coredump
+  '473627e1c9fcdf8f819ced2bb79cb7e9ff598b0c'
+
+  # Revert "core: Check unit start rate limiting earlier"
+  '4fa9d8f14523982482386d398d2b2669902f2098'
 )
 
 _reverts=(
