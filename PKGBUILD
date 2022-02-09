@@ -67,6 +67,8 @@ sha512sums=('SKIP'
             '825b9dd0167c072ba62cabe0677e7cd20f2b4b850328022540f122689d8b25315005fa98ce867cf6e7460b2b26df16b88bb3b5c9ebf721746dce4e2271af7b97')
 
 _backports=(
+  # bus: Use OrderedSet for introspection
+  'acac88340ace3cd631126eebb6d0390cd54e8231'
 )
 
 _reverts=(
@@ -97,15 +99,15 @@ build() {
   local _nameservers=(
     # We use these public name services, ordered by their privacy policy (hopefully):
     #  * Cloudflare (https://1.1.1.1/)
-    #  * Quad9 without filtering (https://www.quad9.net/)
+    #  * Quad9 (https://www.quad9.net/)
     #  * Google (https://developers.google.com/speed/public-dns/)
     # TODO: go back to cloudflare? Currently it is unusable with systemd-resolved...
     #  https://community.cloudflare.com/t/ttl-for-cnames/354506
     #'1.1.1.1#cloudflare-dns.com'
-    '9.9.9.10#dns.quad9.net'
+    '9.9.9.9#dns.quad9.net'
     '8.8.8.8#dns.google'
     #'2606:4700:4700::1111#cloudflare-dns.com'
-    '2620:fe::10#dns.quad9.net'
+    '2620:fe::9#dns.quad9.net'
     '2001:4860:4860::8888#dns.google'
   )
 
