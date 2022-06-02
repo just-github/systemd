@@ -8,8 +8,8 @@
 
 pkgbase=systemd
 pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
-_tag='a57280c2c63622b0f31b707db0ea13ce0c7ce6a0' # git rev-parse v${_tag_name}
-_tag_name=251.1
+_tag='615e67a0eeb479009f185d2526acf7cc1ed36e62' # git rev-parse v${_tag_name}
+_tag_name=251.2
 pkgver="${_tag_name/-/}"
 pkgrel=1
 arch=('x86_64')
@@ -250,6 +250,7 @@ package_systemd() {
   install -D -m0644 systemd-user.pam "$pkgdir"/etc/pam.d/systemd-user
 
   # provided by Manjaro filesystem package
+  # See also https://bugs.archlinux.org/task/74864
   rm "$pkgdir"/usr/share/factory/etc/locale.conf
 }
 
