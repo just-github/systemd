@@ -118,6 +118,10 @@ build() {
     -Dshared-lib-tag="${pkgver}-${pkgrel}"
     -Dmode=release
 
+    # https://bugs.archlinux.org/task/75852
+    --buildtype debugoptimized
+    -D b_ndebug=true
+
     -Dgnu-efi=true
     -Dima=false
     -Dlibidn2=true
