@@ -11,7 +11,7 @@ pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
 _tag='2306696b774a8c23f3796a0c9ebd8486fbb2a069' # git rev-parse v${_tag_name}
 _tag_name=252.2
 pkgver="${_tag_name/-/}"
-pkgrel=3
+pkgrel=4
 arch=('x86_64')
 url='https://www.github.com/systemd/systemd'
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
@@ -19,7 +19,8 @@ makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
              'libmicrohttpd' 'libxcrypt' 'libxslt' 'util-linux' 'linux-api-headers'
              'python-jinja' 'python-lxml' 'quota-tools' 'shadow' 'gnu-efi-libs' 'git'
              'meson' 'libseccomp' 'pcre2' 'audit' 'kexec-tools' 'libxkbcommon'
-             'bash-completion' 'p11-kit' 'systemd' 'libfido2' 'tpm2-tss' 'rsync')
+             'bash-completion' 'p11-kit' 'systemd' 'libfido2' 'tpm2-tss' 'rsync'
+             'bpf' 'libbpf' 'clang' 'llvm')
 #options=('debug' 'strip')
 validpgpkeys=('63CDA1E5D3FC22B998D20DD6327F26951A015CC4'  # Lennart Poettering <lennart@poettering.net>
               'A9EA9081724FFAE0484C35A1A81CEA22BC8C7E2E'  # Luca Boccassi <luca.boccassi@gmail.com>
@@ -124,6 +125,8 @@ build() {
     -Dversion-tag="${_tag_name/-/\~}-${pkgrel}-manjaro"
     -Dshared-lib-tag="${pkgver}-${pkgrel}"
     -Dmode=release
+
+    -Dbpf-framework=true
     -Dgnu-efi=true
     -Dima=false
     -Dlibidn2=true
@@ -152,9 +155,7 @@ build() {
     -Dsbat-distro-summary='Manjaro Linux'
     -Dsbat-distro-pkgname="${pkgname}"
     -Dsbat-distro-version="${pkgver}"
-#    next line work only for Arch Linux
-#    -Dsbat-distro-url="https://archlinux.org/packages/core/x86_64/${pkgname}/"
-    -Dapparmor=false
+    -Dsbat-distro-url="https://gitlab.manjaro.org/packages/core/${pkgname}/"
     -Dsupport-url='https://forum.manjaro.org/c/support'
   )
 
@@ -184,6 +185,7 @@ package_systemd() {
               'systemd-sysvcompat: symlink package to provide sysvinit binaries'
               'polkit: allow administration as unprivileged user'
               'curl: machinectl pull-tar and pull-raw'
+              'libbpf: support BPF programs'
               'libfido2: unlocking LUKS2 volumes with FIDO2 token'
               'tpm2-tss: unlocking LUKS2 volumes with TPM2')
   backup=(etc/pam.d/systemd-user
