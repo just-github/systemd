@@ -8,8 +8,8 @@
 
 pkgbase=systemd
 pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
-_tag='b16ce4c7ab80665b65345ea030c51a5c758fe66b' # git rev-parse v${_tag_name}
-_tag_name=252.5
+_tag='03bfedcdbc660bee4a4a602ace95b8ed86f3c34b' # git rev-parse v${_tag_name}
+_tag_name=252.6
 pkgver="${_tag_name/-/}"
 pkgrel=1
 arch=('x86_64')
@@ -67,8 +67,6 @@ sha512sums=('SKIP'
             '825b9dd0167c072ba62cabe0677e7cd20f2b4b850328022540f122689d8b25315005fa98ce867cf6e7460b2b26df16b88bb3b5c9ebf721746dce4e2271af7b97')
 
 _backports=(
-  # rules: add missing line continuation
-  'de8409ac43f6e4596de4cecce8dbbb5f1f2a18b1'
 )
 
 _reverts=(
