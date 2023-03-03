@@ -8,8 +8,8 @@
 
 pkgbase=systemd
 pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
-_tag='03bfedcdbc660bee4a4a602ace95b8ed86f3c34b' # git rev-parse v${_tag_name}
-_tag_name=252.6
+_tag='5283601cf1898c6b74cca6425d342bf9d16f75c0' # git rev-parse v${_tag_name}
+_tag_name=252.7
 pkgver="${_tag_name/-/}"
 pkgrel=1
 arch=('x86_64')
