@@ -7,9 +7,13 @@
 # Maintainer: Christian Hesse <mail@eworm.de>
 
 pkgbase=systemd
-pkgname=('systemd' 'systemd-libs' 'systemd-resolvconf' 'systemd-sysvcompat')
-_tag='5283601cf1898c6b74cca6425d342bf9d16f75c0' # git rev-parse v${_tag_name}
-_tag_name=252.7
+pkgname=('systemd'
+         'systemd-libs'
+         'systemd-resolvconf'
+         'systemd-sysvcompat'
+         'systemd-ukify')
+_tag='95ffbf3c175b58d4fcf14855a995d038009d3131' # git rev-parse v${_tag_name}
+_tag_name=253.2
 pkgver="${_tag_name/-/}"
 pkgrel=1
 arch=('x86_64')
@@ -20,7 +24,8 @@ makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
              'python-jinja' 'python-lxml' 'quota-tools' 'shadow' 'gnu-efi-libs' 'git'
              'meson' 'libseccomp' 'pcre2' 'audit' 'kexec-tools' 'libxkbcommon'
              'bash-completion' 'p11-kit' 'systemd' 'libfido2' 'tpm2-tss' 'rsync'
-             'bpf' 'libbpf' 'clang' 'llvm'  'curl' 'gnutls')
+             'bpf' 'libbpf' 'clang' 'llvm' 'curl' 'gnutls')
+options=('strip')
 validpgpkeys=('63CDA1E5D3FC22B998D20DD6327F26951A015CC4'  # Lennart Poettering <lennart@poettering.net>
               'A9EA9081724FFAE0484C35A1A81CEA22BC8C7E2E'  # Luca Boccassi <luca.boccassi@gmail.com>
               '9A774DB5DB996C154EBBFBFDA0099A18E29326E1'  # Yu Watanabe <watanabe.yu+github@gmail.com>
@@ -48,14 +53,14 @@ source=("git+https://github.com/systemd/systemd-stable#tag=${_tag}?signed"
 sha512sums=('SKIP'
             'SKIP'
             '3ccf783c28f7a1c857120abac4002ca91ae1f92205dcd5a84aff515d57e706a3f9240d75a0a67cff5085716885e06e62597baa86897f298662ec36a940cf410e'
-            'f0d933e8c6064ed830dec54049b0a01e27be87203208f6ae982f10fb4eddc7258cb2919d594cbfb9a33e74c3510cfd682f3416ba8e804387ab87d1a217eb4b73'
-            'aeefb607471cffb5ed4c3d9f36dc0954a9a08cee4b7b4ff55468b561e089e3d8448398906a7df328049ba51b712e4d50698b96bc152bdb03a35ce39c3f51a7cb'
+            '4a6cd0cf6764863985dc5ad774d7c93b574645a05b3295f989342951d43c71696d069641592e37eeadb6d6f0531576de96b6392224452f15cd9f056fae038f8e'
+            '12f3c011a0164d28b092722639fff92c663c18b032d421695b0a72dbf123dd0908e3822087766ee922e131c02126f67ba2e1983c5cc244f5c4884dfed8605d00'
             'a8c7e4a2cc9c9987e3c957a1fc3afe8281f2281fffd2e890913dcf00cf704024fb80d86cb75f9314b99b0e03bac275b22de93307bfc226d8be9435497e95b7e6'
             '72dfd0e513e61f391d2b0bf8d9f13c6e2d2732dd7bd52413dccc791c562ab6265062c17d5abe60a42db0775e0b2352eba5e18d14fa2740c176d82edac4867c32'
             '363052706e8fdb040754d0bdc75377212865314ffb8718f8889e6c8a0049ea6cc442cb34fb9a204622eca597b78a547421867cb7517bd1b7342badee581bde7d'
             '6200f2844bdcd230ef4efd27313a92b663a199fe7b3cf1794d17ca4d62bb2d7e9856e6a6e2ea0b912955df124c9d97374c70ae4ef2ff092b25296769fe9e8ba7'
             'b90c99d768dc2a4f020ba854edf45ccf1b86a09d2f66e475de21fe589ff7e32c33ef4aa0876d7f1864491488fd7edb2682fc0d68e83a6d4890a0778dc2d6fe19'
-            '217a9dc3f9d8cd0c9fee54f777396f5a270c2e8a30c572ce5f635165adadcec275af0dae1456019cedb9cc93b7cef0862e5070aeb99a19e496625200e8dfac93'
+            'a586f62b92268ae1e8a9310b02693548fb114292e1252953b4c9475d29e2817b5042a612f3b3ef09fb5b18126e2c3486ff49dd764d97644f0c510ae0200e075b'
             '299dcc7094ce53474521356647bdd2fb069731c08d14a872a425412fcd72da840727a23664b12d95465bf313e8e8297da31259508d1c62cc2dcea596160e21c5'
             '0d6bc3d928cfafe4e4e0bc04dbb95c5d2b078573e4f9e0576e7f53a8fab08a7077202f575d74a3960248c4904b5f7f0661bf17dbe163c524ab51dd30e3cb80f7'
             '2b50b25e8680878f7974fa9d519df7e141ca11c4bfe84a92a5d01bb193f034b1726ea05b3c0030bad1fbda8dbb78bf1dc7b73859053581b55ba813c39b27d9dc'
@@ -167,19 +172,22 @@ package_systemd() {
            'iptables' 'kbd' 'kmod' 'libkmod.so' 'hwdata' 'libcap' 'libcap.so'
            'libgcrypt' 'libxcrypt' 'libcrypt.so' 'systemd-libs' 'libidn2' 'lz4' 'pam'
            'libelf' 'libseccomp' 'libseccomp.so' 'util-linux' 'libblkid.so'
-           'libmount.so' 'xz' 'pcre2' 'audit' 'libaudit.so' 'libp11-kit'
-           'libp11-kit.so' 'openssl' 'libcrypto.so' 'libssl.so')
+           'libmount.so' 'xz' 'pcre2' 'audit' 'libaudit.so' 
+           'openssl' 'libcrypto.so' 'libssl.so')
   provides=('nss-myhostname' "systemd-tools=$pkgver" "udev=$pkgver")
   replaces=('nss-myhostname' 'systemd-tools' 'udev')
   conflicts=('nss-myhostname' 'systemd-tools' 'udev')
-  optdepends=('libmicrohttpd: remote journald capabilities'
+  optdepends=('libmicrohttpd: systemd-journal-gatewayd and systemd-journal-remote'
               'quota-tools: kernel-level quota management'
               'systemd-sysvcompat: symlink package to provide sysvinit binaries'
+              'systemd-ukify: combine kernel and initrd into a signed Unified Kernel Image'
               'polkit: allow administration as unprivileged user'
+              'python: Unified Kernel Image with ukify'
               'curl: systemd-journal-upload, machinectl pull-tar and pull-raw'
               'gnutls: systemd-journal-gatewayd and systemd-journal-remote'
               'libbpf: support BPF programs'
               'libfido2: unlocking LUKS2 volumes with FIDO2 token'
+              'libp11-kit: support PKCS#11'
               'tpm2-tss: unlocking LUKS2 volumes with TPM2')
   backup=(etc/pam.d/systemd-user
           etc/systemd/coredump.conf
@@ -205,8 +213,16 @@ package_systemd() {
   rmdir "$pkgdir"/var/log/journal/remote
 
   # runtime libraries shipped with systemd-libs
-  install -d -m0755 systemd-libs
-  mv "$pkgdir"/usr/lib/lib{nss,systemd,udev}*.so* systemd-libs
+  install -d -m0755 systemd-libs/lib/
+  mv "$pkgdir"/usr/lib/lib{nss,systemd,udev}*.so* systemd-libs/lib/
+  mv "$pkgdir"/usr/lib/pkgconfig systemd-libs/lib/pkgconfig
+  mv "$pkgdir"/usr/include systemd-libs/include
+  mv "$pkgdir"/usr/share/man/man3 systemd-libs/man3
+
+  # ukify shipped in separate package
+  install -d -m0755 systemd-ukify/{systemd,man1}
+  mv "$pkgdir"/usr/lib/systemd/ukify systemd-ukify/systemd/
+  mv "$pkgdir"/usr/share/man/man1/ukify.1 systemd-ukify/man1/
 
   # manpages shipped with systemd-sysvcompat
   rm "$pkgdir"/usr/share/man/man8/{halt,poweroff,reboot,shutdown}.8
@@ -253,14 +269,16 @@ package_systemd() {
 
 package_systemd-libs() {
   pkgdesc='systemd client libraries'
-  depends=('glibc' 'libcap' 'libgcrypt' 'libp11-kit' 'lz4' 'xz' 'zstd')
+  depends=('glibc' 'gcc-libs' 'libcap' 'libgcrypt' 'lz4' 'xz' 'zstd')
   license=('LGPL2.1')
   provides=('libsystemd' 'libsystemd.so' 'libudev.so')
   conflicts=('libsystemd')
   replaces=('libsystemd')
 
-  install -d -m0755 "$pkgdir"/usr
-  mv systemd-libs "$pkgdir"/usr/lib
+  install -d -m0755 "$pkgdir"/usr/share/man
+  mv systemd-libs/lib "$pkgdir"/usr/lib
+  mv systemd-libs/include "$pkgdir"/usr/include
+  mv systemd-libs/man3 "$pkgdir"/usr/share/man/man3
 }
 
 package_systemd-resolvconf() {
@@ -292,3 +310,18 @@ package_systemd-sysvcompat() {
     ln -s systemctl "$pkgdir"/usr/bin/$tool
   done
 }
+
+package_systemd-ukify() {
+  pkgdesc='Combine kernel and initrd into a signed Unified Kernel Image'
+  license=('GPL2')
+  provides=('ukify')
+  depends=('binutils' 'python-pefile' 'systemd')
+  optdepends=('python-pillow: Show the size of splash image'
+              'sbsigntools: Sign the embedded kernel')
+
+  install -d -m0755 "$pkgdir"/usr/{lib,share/man}
+  mv systemd-ukify/systemd "$pkgdir"/usr/lib/systemd
+  mv systemd-ukify/man1 "$pkgdir"/usr/share/man/man1
+}
+
+# vim:ft=sh syn=sh et sw=2:
