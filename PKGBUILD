@@ -12,10 +12,10 @@ pkgname=('systemd'
          'systemd-resolvconf'
          'systemd-sysvcompat'
          'systemd-ukify')
-_tag='c017ed867787d09484ba7de75a8f025820596955' # git rev-parse v${_tag_name}
-_tag_name=253.6
+_tag='9ffd1620fb5625e5e558a63935a8786f550b7f27' # git rev-parse v${_tag_name}
+_tag_name=253.7
 pkgver="${_tag_name/-/}"
-pkgrel=2
+pkgrel=1
 arch=('x86_64')
 url='https://www.github.com/systemd/systemd'
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
@@ -72,8 +72,6 @@ sha512sums=('SKIP'
             '825b9dd0167c072ba62cabe0677e7cd20f2b4b850328022540f122689d8b25315005fa98ce867cf6e7460b2b26df16b88bb3b5c9ebf721746dce4e2271af7b97')
 
 _backports=(
-  # Revert "core/service: when resetting PID also reset known flag"
-  '996b00ede87d6a870332e63974a7d4def3c2f1b0'
 )
 
 _reverts=(
