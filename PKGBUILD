@@ -12,7 +12,7 @@ pkgname=('systemd'
          'systemd-resolvconf'
          'systemd-sysvcompat'
          'systemd-ukify')
-_tag='ef6c2daf9947d23e2ba6d50c42e4a0d79fe8d32c' # git rev-parse v${_tag_name}
+_tag='42f5ba1e56ddb81c244e0d85f13109acdb14cbee' # git rev-parse v${_tag_name}
 _tag_name=254.5
 pkgver="${_tag_name/-/}"
 pkgrel=1
