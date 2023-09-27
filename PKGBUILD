@@ -15,7 +15,7 @@ pkgname=('systemd'
 _tag='2d7670ddc4473e18c92b15b4a4522e4f12a59d33' # git rev-parse v${_tag_name}
 _tag_name=254.4
 pkgver="${_tag_name/-/}"
-pkgrel=2
+pkgrel=3
 arch=('x86_64')
 url='https://www.github.com/systemd/systemd'
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
@@ -35,13 +35,17 @@ validpgpkeys=('63CDA1E5D3FC22B998D20DD6327F26951A015CC4'  # Lennart Poettering <
 source=("git+https://github.com/systemd/systemd-stable#tag=${_tag}?signed"
         "git+https://github.com/systemd/systemd#tag=v${_tag_name%.*}?signed"
         '0001-Use-Arch-Linux-device-access-groups.patch'
+        # mkinitcpio files
         'initcpio-hook-udev'
         'initcpio-install-systemd'
         'initcpio-install-udev'
+        # bootloader files
         'manjaro.conf'
         'loader.conf'
         'splash-manjaro.bmp'
+        # pam configuration
         'systemd-user.pam'
+        # pacman / libalpm hooks
         'systemd-hook'
         '20-systemd-sysusers.hook'
         '30-systemd-binfmt.hook'
@@ -62,7 +66,7 @@ sha512sums=('SKIP'
             '363052706e8fdb040754d0bdc75377212865314ffb8718f8889e6c8a0049ea6cc442cb34fb9a204622eca597b78a547421867cb7517bd1b7342badee581bde7d'
             '6200f2844bdcd230ef4efd27313a92b663a199fe7b3cf1794d17ca4d62bb2d7e9856e6a6e2ea0b912955df124c9d97374c70ae4ef2ff092b25296769fe9e8ba7'
             'b90c99d768dc2a4f020ba854edf45ccf1b86a09d2f66e475de21fe589ff7e32c33ef4aa0876d7f1864491488fd7edb2682fc0d68e83a6d4890a0778dc2d6fe19'
-            'a481662fa406f46f69d721fa47c12b1a9ed9b8bc219205e2a156f27bdc9f353f3ec97753717452f603500e3bdf6062335190797512e4f29c1526c35297abe37b'
+            '5c4119bf1d84b22986dc8d0c4c2de26500b824c21dfac69f22e36809e2673f0652447cc8c9f77190ad098896f4a5e1d03fa33676fe962de631bbfa44513a8860'
             '299dcc7094ce53474521356647bdd2fb069731c08d14a872a425412fcd72da840727a23664b12d95465bf313e8e8297da31259508d1c62cc2dcea596160e21c5'
             '0d6bc3d928cfafe4e4e0bc04dbb95c5d2b078573e4f9e0576e7f53a8fab08a7077202f575d74a3960248c4904b5f7f0661bf17dbe163c524ab51dd30e3cb80f7'
             '2b50b25e8680878f7974fa9d519df7e141ca11c4bfe84a92a5d01bb193f034b1726ea05b3c0030bad1fbda8dbb78bf1dc7b73859053581b55ba813c39b27d9dc'
@@ -74,6 +78,8 @@ sha512sums=('SKIP'
             '825b9dd0167c072ba62cabe0677e7cd20f2b4b850328022540f122689d8b25315005fa98ce867cf6e7460b2b26df16b88bb3b5c9ebf721746dce4e2271af7b97')
 
 _backports=(
+  # current stable/v254-stable
+  "v${_tag_name}..149ba4f8e81fc3fbd883eed4c461a00df33e55cc"
 )
 
 _reverts=(
