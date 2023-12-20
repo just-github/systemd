@@ -12,8 +12,8 @@ pkgname=('systemd'
          'systemd-resolvconf'
          'systemd-sysvcompat'
          'systemd-ukify')
-_tag='2c409ec5643411349b09c475098c5cfc5702c63b' # git rev-parse v${_tag_name}
-_tag_name=254.7
+_tag='6eb55199ed8953019853c2bcdb2e29743d90a86d' # git rev-parse v${_tag_name}
+_tag_name=255.1
 pkgver="${_tag_name/-/}"
 pkgrel=1
 arch=('x86_64')
@@ -25,7 +25,7 @@ makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
              'meson' 'libseccomp' 'pcre2' 'audit' 'kexec-tools' 'libxkbcommon'
              'bash-completion' 'p11-kit' 'systemd' 'libfido2' 'tpm2-tss' 'rsync'
              'bpf' 'libbpf' 'clang' 'llvm' 'curl' 'gnutls' 'python-pyelftools'
-             'lib32-gcc-libs')
+             'libpwquality' 'qrencode' 'lib32-gcc-libs')
 checkdepends=('python-pefile')
 options=('strip')
 validpgpkeys=('63CDA1E5D3FC22B998D20DD6327F26951A015CC4'  # Lennart Poettering <lennart@poettering.net>
@@ -50,7 +50,8 @@ source=("git+https://github.com/systemd/systemd-stable#tag=${_tag}?signed"
         '20-systemd-sysusers.hook'
         '30-systemd-binfmt.hook'
         '30-systemd-catalog.hook'
-        '30-systemd-daemon-reload.hook'
+        '30-systemd-daemon-reload-system.hook'
+        '30-systemd-daemon-reload-user.hook'
         '30-systemd-hwdb.hook'
         '30-systemd-sysctl.hook'
         '30-systemd-tmpfiles.hook'
@@ -60,17 +61,18 @@ sha512sums=('SKIP'
             'SKIP'
             '3ccf783c28f7a1c857120abac4002ca91ae1f92205dcd5a84aff515d57e706a3f9240d75a0a67cff5085716885e06e62597baa86897f298662ec36a940cf410e'
             '4a6cd0cf6764863985dc5ad774d7c93b574645a05b3295f989342951d43c71696d069641592e37eeadb6d6f0531576de96b6392224452f15cd9f056fae038f8e'
-            '94a3bf4720d428c2ec4e6c493f78debeb3d3b865ba2bef266f388bffccda8592af81a1fa2cd98f3d60720935e796572fa07256ffafb8d73342214f0ca8ba7acc'
+            'ada692514d758fa11e2be6b4c5e1dc2d9d47548f24ada35afdce1dcac918e72ae2251c892773e6cf41fa431c3613a1608668e999eb86a565870fecb55c47b4ba'
             'a8c7e4a2cc9c9987e3c957a1fc3afe8281f2281fffd2e890913dcf00cf704024fb80d86cb75f9314b99b0e03bac275b22de93307bfc226d8be9435497e95b7e6'
             '72dfd0e513e61f391d2b0bf8d9f13c6e2d2732dd7bd52413dccc791c562ab6265062c17d5abe60a42db0775e0b2352eba5e18d14fa2740c176d82edac4867c32'
             '363052706e8fdb040754d0bdc75377212865314ffb8718f8889e6c8a0049ea6cc442cb34fb9a204622eca597b78a547421867cb7517bd1b7342badee581bde7d'
             '6200f2844bdcd230ef4efd27313a92b663a199fe7b3cf1794d17ca4d62bb2d7e9856e6a6e2ea0b912955df124c9d97374c70ae4ef2ff092b25296769fe9e8ba7'
             'b90c99d768dc2a4f020ba854edf45ccf1b86a09d2f66e475de21fe589ff7e32c33ef4aa0876d7f1864491488fd7edb2682fc0d68e83a6d4890a0778dc2d6fe19'
-            '5c4119bf1d84b22986dc8d0c4c2de26500b824c21dfac69f22e36809e2673f0652447cc8c9f77190ad098896f4a5e1d03fa33676fe962de631bbfa44513a8860'
+            '3cb8f88c1bffc753d0c540be5d25a0fdb9224478cca64743b5663340f2f26b197775286e6e680228db54c614dcd11da1135e625674a622127681662bec4fa886'
             '299dcc7094ce53474521356647bdd2fb069731c08d14a872a425412fcd72da840727a23664b12d95465bf313e8e8297da31259508d1c62cc2dcea596160e21c5'
             '0d6bc3d928cfafe4e4e0bc04dbb95c5d2b078573e4f9e0576e7f53a8fab08a7077202f575d74a3960248c4904b5f7f0661bf17dbe163c524ab51dd30e3cb80f7'
             '2b50b25e8680878f7974fa9d519df7e141ca11c4bfe84a92a5d01bb193f034b1726ea05b3c0030bad1fbda8dbb78bf1dc7b73859053581b55ba813c39b27d9dc'
-            '63e55b3acd14bc54320b6f2310b43398651ad4e262d4f4a0135e05d34a993e56ed673cc46e57f15b418371df5c4cef6f54486db96325e4abb1d33fb1a3946254'
+            'a436d3f5126c6c0d6b58c6865e7bd38dbfbfb7babe017eeecb5e9d162c21902cbf4e0a68cf3ac2f99815106f9fa003b075bd2b4eb5d16333fa913df6e2f3e32a'
+            '190112e38d5a5c0ca91b89cd58f95595262a551530a16546e1d84700fc9644aa2ca677953ffff655261e8a7bff6e6af4e431424df5f13c00bc90b77c421bc32d'
             'a1661ab946c6cd7d3c6251a2a9fd68afe231db58ce33c92c42594aedb5629be8f299ba08a34713327b373a3badd1554a150343d8d3e5dfb102999c281bd49154'
             '9426829605bbb9e65002437e02ed54e35c20fdf94706770a3dc1049da634147906d6b98bf7f5e7516c84068396a12c6feaf72f92b51bdf19715e0f64620319de'
             'da7a97d5d3701c70dd5388b0440da39006ee4991ce174777931fea2aa8c90846a622b2b911f02ae4d5fffb92680d9a7e211c308f0f99c04896278e2ee0d9a4dc'
@@ -127,13 +129,16 @@ build() {
     -Dshared-lib-tag="${pkgver}-${pkgrel}"
     -Dmode=release
 
+    -Dapparmor=false
     -Dbootloader=true
+    -Dxenctrl=false
     -Dbpf-framework=true
     -Dima=false
     -Dlibidn2=true
     -Dlz4=true
     -Dman=true
     -Dnscd=false
+    -Dselinux=false
 
     # We disable DNSSEC by default, it still causes trouble:
     # https://github.com/systemd/systemd/issues/10579
@@ -178,7 +183,7 @@ package_systemd() {
   pkgdesc='system and service manager'
   license=('GPL2' 'LGPL2.1')
   depends=('acl' 'libacl.so' 'bash' 'cryptsetup' 'libcryptsetup.so' 'dbus'
-           'iptables' 'kbd' 'kmod' 'libkmod.so' 'hwdata' 'libcap' 'libcap.so'
+           'kbd' 'kmod' 'libkmod.so' 'hwdata' 'libcap' 'libcap.so'
            'libgcrypt' 'libxcrypt' 'libcrypt.so' 'systemd-libs' 'libidn2' 'lz4' 'pam'
            'libelf' 'libseccomp' 'libseccomp.so' 'util-linux' 'libblkid.so'
            'libmount.so' 'xz' 'pcre2' 'audit' 'libaudit.so'
@@ -191,10 +196,12 @@ package_systemd() {
               'systemd-sysvcompat: symlink package to provide sysvinit binaries'
               'systemd-ukify: combine kernel and initrd into a signed Unified Kernel Image'
               'polkit: allow administration as unprivileged user'
-              'python: Unified Kernel Image with ukify'
               'curl: systemd-journal-upload, machinectl pull-tar and pull-raw'
               'gnutls: systemd-journal-gatewayd and systemd-journal-remote'
+              'qrencode: show QR codes'
+              'iptables: firewall features'
               'libbpf: support BPF programs'
+              'libpwquality: check password quality'
               'libfido2: unlocking LUKS2 volumes with FIDO2 token'
               'libp11-kit: support PKCS#11'
               'tpm2-tss: unlocking LUKS2 volumes with TPM2')
@@ -230,11 +237,13 @@ package_systemd() {
   mv "$pkgdir"/usr/share/man/man3 systemd-libs/man3
 
   # ukify shipped in separate package
-  # we do *NOT* move the kernel-install files there, as other ways of
-  # creating uki exist!
-  install -d -m0755 systemd-ukify/{systemd,man1}
+  install -d -m0755 systemd-ukify/{bin,systemd,man1,install.d}
+  mv "$pkgdir"/usr/bin/ukify systemd-ukify/bin/
   mv "$pkgdir"/usr/lib/systemd/ukify systemd-ukify/systemd/
   mv "$pkgdir"/usr/share/man/man1/ukify.1 systemd-ukify/man1/
+  # we move the ukify hook itself, but keep 90-uki-copy.install in place,
+  # because there are other ways to generate UKIs w/o ukify, e.g. w/ mkinitcpio
+  mv "$pkgdir"/usr/lib/kernel/install.d/60-ukify.install systemd-ukify/install.d
 
   # manpages shipped with systemd-sysvcompat
   rm "$pkgdir"/usr/share/man/man8/{halt,poweroff,reboot,shutdown}.8
@@ -298,7 +307,7 @@ package_systemd-resolvconf() {
   license=('LGPL2.1')
   depends=('systemd')
   provides=('openresolv' 'resolvconf')
-  conflicts=('openresolv')
+  conflicts=('resolvconf')
 
   install -d -m0755 "$pkgdir"/usr/bin
   ln -s resolvectl "$pkgdir"/usr/bin/resolvconf
@@ -331,9 +340,11 @@ package_systemd-ukify() {
   optdepends=('python-pillow: Show the size of splash image'
               'sbsigntools: Sign the embedded kernel')
 
-  install -d -m0755 "$pkgdir"/usr/{lib,share/man}
+  install -d -m0755 "$pkgdir"/usr/{lib/kernel,share/man}
+  mv systemd-ukify/bin "$pkgdir"/usr/bin
   mv systemd-ukify/systemd "$pkgdir"/usr/lib/systemd
   mv systemd-ukify/man1 "$pkgdir"/usr/share/man/man1
+  mv systemd-ukify/install.d "$pkgdir"/usr/lib/kernel/install.d
 }
 
 # vim:ft=sh syn=sh et sw=2:
