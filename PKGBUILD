@@ -272,9 +272,6 @@ package_systemd() {
   # will fix the permissions for us. (see /usr/lib/tmpfiles.d/systemd.conf)
   install -d -o root -g root -m 2755 "$pkgdir"/var/log/journal
 
-  # match directory owner/group and mode from [extra]/polkit
-  install -d -o root -g root -m 0755 "$pkgdir"/usr/share/polkit-1/rules.d
-
   # add example bootctl configuration
   install -D -m0644 manjaro.conf "$pkgdir"/usr/share/systemd/bootctl/manjaro.conf
   install -D -m0644 loader.conf "$pkgdir"/usr/share/systemd/bootctl/loader.conf
