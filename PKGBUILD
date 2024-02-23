@@ -15,6 +15,7 @@ _tag_name=255.3
 pkgver="${_tag_name/-/}"
 pkgrel=1
 arch=('x86_64')
+license=('LGPL-2.1-or-later')
 url='https://www.github.com/systemd/systemd'
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
              'intltool' 'iptables' 'kmod' 'libcap' 'libidn2' 'libgcrypt'
@@ -172,12 +173,16 @@ build() {
 }
 
 check() {
-  meson test -C build
+  meson test -C build --print-errorlogs
 }
 
 package_systemd() {
   pkgdesc='system and service manager'
-  license=('GPL2' 'LGPL2.1')
+  license+=(
+    'CC0-1.0' # siphash
+    'GPL-2.0-or-later' # udev
+    'MIT-0' # documentation and config files
+  )
   depends=('acl' 'libacl.so' 'bash' 'cryptsetup' 'libcryptsetup.so' 'dbus'
            'dbus-units' 'kbd' 'kmod' 'libkmod.so' 'hwdata' 'libcap' 'libcap.so'
            'libgcrypt' 'libxcrypt' 'libcrypt.so' 'systemd-libs' 'libidn2' 'lz4' 'pam'
@@ -284,7 +289,10 @@ package_systemd() {
 package_systemd-libs() {
   pkgdesc='systemd client libraries'
   depends=('glibc' 'gcc-libs' 'libcap' 'libgcrypt' 'lz4' 'xz' 'zstd')
-  license=('LGPL2.1')
+  license+=(
+    'CC0-1.0' # siphash
+    'GPL-2.0-or-later WITH Linux-syscall-note' # src/basic/linux/*
+  )
   provides=('libsystemd' 'libsystemd.so' 'libudev.so')
   conflicts=('libsystemd')
   replaces=('libsystemd')
@@ -297,7 +305,6 @@ package_systemd-libs() {
 
 package_systemd-resolvconf() {
   pkgdesc='systemd resolvconf replacement (for use with systemd-resolved)'
-  license=('LGPL2.1')
   depends=('systemd')
   provides=('openresolv' 'resolvconf')
   conflicts=('resolvconf')
@@ -311,7 +318,6 @@ package_systemd-resolvconf() {
 
 package_systemd-sysvcompat() {
   pkgdesc='sysvinit compat for systemd'
-  license=('GPL2')
   conflicts=('sysvinit')
   depends=('systemd')
 
@@ -327,7 +333,6 @@ package_systemd-sysvcompat() {
 
 package_systemd-ukify() {
   pkgdesc='Combine kernel and initrd into a signed Unified Kernel Image'
-  license=('GPL2')
   provides=('ukify')
   depends=('binutils' 'python-cryptography' 'python-pefile' 'systemd')
   optdepends=('python-pillow: Show the size of splash image'
