@@ -12,7 +12,14 @@ pkgname=('systemd'
          'systemd-ukify')
 _tag='8cf1da1e9172ba04d90a483a63118873343ea656' # git rev-parse v${_tag_name}
 _tag_name=255.3
-pkgver="${_tag_name/-/}"
+# Upstream versioning is incompatible with pacman's version comparisons so we
+# replace tildes with the empty string to make sure pacman's version comparing
+# does the right thing for rc versions:
+# ➜ vercmp 255~rc1 255
+# 1
+# ➜ vercmp 255rc1 255
+# -1
+pkgver="${_tag_name/~/}"
 pkgrel=1
 arch=('x86_64')
 license=('LGPL-2.1-or-later')
@@ -120,9 +127,9 @@ build() {
   )
 
   local _meson_options=(
-    # internal version comparison is incompatible with pacman:
-    #   249~rc1 < 249 < 249.1 < 249rc
-    -Dversion-tag="${_tag_name/-/\~}-${pkgrel}-manjaro"
+    -Dversion-tag="${_tag_name}-${pkgrel}-manjaro"
+    # We use the version without tildes as the shared library tag because
+    # pacman looks at the shared library version.
     -Dshared-lib-tag="${pkgver}-${pkgrel}"
     -Dmode=release
 
