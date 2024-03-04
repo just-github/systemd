@@ -20,7 +20,7 @@ _tag_name=255.4
 # ➜ vercmp 255rc1 255
 # -1
 pkgver="${_tag_name/~/}"
-pkgrel=1
+pkgrel=2
 arch=('x86_64')
 license=('LGPL-2.1-or-later')
 url='https://www.github.com/systemd/systemd'
@@ -32,6 +32,7 @@ makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
              'bash-completion' 'p11-kit' 'systemd' 'libfido2' 'tpm2-tss' 'rsync'
              'bpf' 'libbpf' 'clang' 'llvm' 'curl' 'gnutls' 'python-pyelftools'
              'libpwquality' 'qrencode' 'lib32-gcc-libs' 'python-pefile')
+conflicts=("mkinitcpio<38-1")
 validpgpkeys=('63CDA1E5D3FC22B998D20DD6327F26951A015CC4'  # Lennart Poettering <lennart@poettering.net>
               'A9EA9081724FFAE0484C35A1A81CEA22BC8C7E2E'  # Luca Boccassi <luca.boccassi@gmail.com>
               '9A774DB5DB996C154EBBFBFDA0099A18E29326E1'  # Yu Watanabe <watanabe.yu+github@gmail.com>
@@ -39,10 +40,6 @@ validpgpkeys=('63CDA1E5D3FC22B998D20DD6327F26951A015CC4'  # Lennart Poettering <
 source=("git+https://github.com/systemd/systemd-stable#tag=${_tag}?signed"
         "git+https://github.com/systemd/systemd#tag=v${_tag_name%.*}?signed"
         '0001-Use-Arch-Linux-device-access-groups.patch'
-        # mkinitcpio files
-        'initcpio-hook-udev'
-        'initcpio-install-systemd'
-        'initcpio-install-udev'
         # bootloader files
         'manjaro.conf'
         'loader.conf'
@@ -64,9 +61,6 @@ source=("git+https://github.com/systemd/systemd-stable#tag=${_tag}?signed"
 sha512sums=('SKIP'
             'SKIP'
             '3ccf783c28f7a1c857120abac4002ca91ae1f92205dcd5a84aff515d57e706a3f9240d75a0a67cff5085716885e06e62597baa86897f298662ec36a940cf410e'
-            '4a6cd0cf6764863985dc5ad774d7c93b574645a05b3295f989342951d43c71696d069641592e37eeadb6d6f0531576de96b6392224452f15cd9f056fae038f8e'
-            '9a276df13f21a4a67278a62e122a76afdd5973a8c204bfe22acd0a5c018ae99182f2ecefeea3dc9bca81ba864ee90dde461f0ee7c948365166a7c8b253a58e58'
-            'a8c7e4a2cc9c9987e3c957a1fc3afe8281f2281fffd2e890913dcf00cf704024fb80d86cb75f9314b99b0e03bac275b22de93307bfc226d8be9435497e95b7e6'
             '72dfd0e513e61f391d2b0bf8d9f13c6e2d2732dd7bd52413dccc791c562ab6265062c17d5abe60a42db0775e0b2352eba5e18d14fa2740c176d82edac4867c32'
             '363052706e8fdb040754d0bdc75377212865314ffb8718f8889e6c8a0049ea6cc442cb34fb9a204622eca597b78a547421867cb7517bd1b7342badee581bde7d'
             '6200f2844bdcd230ef4efd27313a92b663a199fe7b3cf1794d17ca4d62bb2d7e9856e6a6e2ea0b912955df124c9d97374c70ae4ef2ff092b25296769fe9e8ba7'
@@ -265,11 +259,6 @@ package_systemd() {
 
   # ship default policy to leave services disabled
   echo 'disable *' >"$pkgdir"/usr/lib/systemd/system-preset/99-default.preset
-
-  # add mkinitcpio hooks
-  install -D -m0644 initcpio-install-systemd "$pkgdir"/usr/lib/initcpio/install/systemd
-  install -D -m0644 initcpio-install-udev "$pkgdir"/usr/lib/initcpio/install/udev
-  install -D -m0644 initcpio-hook-udev "$pkgdir"/usr/lib/initcpio/hooks/udev
 
   # The group 'systemd-journal' is allocated dynamically and may have varying
   # gid on different systems. Let's install with gid 0 (root), systemd-tmpfiles
