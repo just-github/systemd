@@ -10,8 +10,7 @@ pkgname=('systemd'
          'systemd-resolvconf'
          'systemd-sysvcompat'
          'systemd-ukify')
-_tag='4003dd6754e3446691402d3cc389fbfd4faccc90' # git rev-parse v${_tag_name}
-_tag_name=255.4
+_tag='255.4'
 # Upstream versioning is incompatible with pacman's version comparisons so we
 # replace tildes with the empty string to make sure pacman's version comparing
 # does the right thing for rc versions:
@@ -19,7 +18,7 @@ _tag_name=255.4
 # 1
 # ➜ vercmp 255rc1 255
 # -1
-pkgver="${_tag_name/~/}"
+pkgver="${_tag/~/}"
 pkgrel=2
 arch=('x86_64')
 license=('LGPL-2.1-or-later')
@@ -37,8 +36,8 @@ validpgpkeys=('63CDA1E5D3FC22B998D20DD6327F26951A015CC4'  # Lennart Poettering <
               'A9EA9081724FFAE0484C35A1A81CEA22BC8C7E2E'  # Luca Boccassi <luca.boccassi@gmail.com>
               '9A774DB5DB996C154EBBFBFDA0099A18E29326E1'  # Yu Watanabe <watanabe.yu+github@gmail.com>
               '5C251B5FC54EB2F80F407AAAC54CA336CFEB557E') # Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl>
-source=("git+https://github.com/systemd/systemd-stable#tag=${_tag}?signed"
-        "git+https://github.com/systemd/systemd#tag=v${_tag_name%.*}?signed"
+source=("git+https://github.com/systemd/systemd-stable#tag=v${_tag}?signed"
+        "git+https://github.com/systemd/systemd#tag=v${_tag%.*}?signed"
         '0001-Use-Arch-Linux-device-access-groups.patch'
         # bootloader files
         'manjaro.conf'
@@ -58,8 +57,8 @@ source=("git+https://github.com/systemd/systemd-stable#tag=${_tag}?signed"
         '30-systemd-tmpfiles.hook'
         '30-systemd-udev-reload.hook'
         '30-systemd-update.hook')
-sha512sums=('SKIP'
-            'SKIP'
+sha512sums=('0c41c21931c5f08b5c91fe718d90f8cb11fb83429b3028bde9922605a35ea81d8452b00af99775b519b19195b8ba0084147d13dec1c5dfe9c905d769018b0676'
+            'd430427987309483c99062adb02741d25239ba5fbb97053ef817c0c5a0a935328af9c8b651de2b119b0e851dcf6623f01343859735ff81d7013ab0133e67c7ea'
             '3ccf783c28f7a1c857120abac4002ca91ae1f92205dcd5a84aff515d57e706a3f9240d75a0a67cff5085716885e06e62597baa86897f298662ec36a940cf410e'
             '72dfd0e513e61f391d2b0bf8d9f13c6e2d2732dd7bd52413dccc791c562ab6265062c17d5abe60a42db0775e0b2352eba5e18d14fa2740c176d82edac4867c32'
             '363052706e8fdb040754d0bdc75377212865314ffb8718f8889e6c8a0049ea6cc442cb34fb9a204622eca597b78a547421867cb7517bd1b7342badee581bde7d'
