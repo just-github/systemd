@@ -76,6 +76,23 @@ sha512sums=('0c41c21931c5f08b5c91fe718d90f8cb11fb83429b3028bde9922605a35ea81d845
             'a50d202a9c2e91a4450b45c227b295e1840cc99a5e545715d69c8af789ea3dd95a03a30f050d52855cabdc9183d4688c1b534eaa755ebe93616f9d192a855ee3'
             '825b9dd0167c072ba62cabe0677e7cd20f2b4b850328022540f122689d8b25315005fa98ce867cf6e7460b2b26df16b88bb3b5c9ebf721746dce4e2271af7b97')
 
+_meson_version="${pkgver}-${pkgrel}"
+_meson_mode='release'
+_meson_compile=()
+_meson_install=()
+
+if ((UPSTREAM)); then
+  _meson_version="${pkgver}"
+  _meson_mode='developer'
+  makedepends+=('libarchive')
+  optdepends_upstream=('libarchive: convert DDIs to tarballs')
+  if ((QUIET)); then
+    _meson_install=('--quiet')
+  else
+    _meson_compile=('--verbose')
+  fi
+fi
+
 _backports=(
 )
 
@@ -120,11 +137,11 @@ build() {
   )
 
   local _meson_options=(
-    -Dversion-tag="${_tag_name}-${pkgrel}-manjaro"
+    -Dversion-tag="${_meson_version}-manjaro"
     # We use the version without tildes as the shared library tag because
     # pacman looks at the shared library version.
-    -Dshared-lib-tag="${pkgver}-${pkgrel}"
-    -Dmode=release
+    -Dshared-lib-tag="${_meson_version/~/}"
+    -Dmode="${_meson_mode}"
 
     -Dapparmor=false
     -Dbootloader=true
@@ -163,9 +180,9 @@ build() {
     -Dsupport-url='https://forum.manjaro.org/c/support'
   )
 
-  arch-meson "$pkgbase-stable" build "${_meson_options[@]}"
+  arch-meson "$pkgbase-stable" build "${_meson_options[@]}" $MESON_EXTRA_CONFIGURE_OPTIONS
 
-  meson compile -C build
+  meson compile -C build "${_meson_compile[@]}"
 }
 
 check() {
@@ -202,6 +219,7 @@ package_systemd() {
               'libfido2: unlocking LUKS2 volumes with FIDO2 token'
               'libp11-kit: support PKCS#11'
               'tpm2-tss: unlocking LUKS2 volumes with TPM2')
+  optdepends+=("${_optdepends_upstream[@]}")
   backup=(etc/pam.d/systemd-user
           etc/systemd/coredump.conf
           etc/systemd/homed.conf
@@ -221,7 +239,7 @@ package_systemd() {
           etc/udev/udev.conf)
   install=systemd.install
 
-  meson install -C build --destdir "$pkgdir"
+  meson install -C build --destdir "$pkgdir" "${_meson_install[@]}"
 
   # we'll create this on installation
   rmdir "$pkgdir"/var/log/journal/remote
