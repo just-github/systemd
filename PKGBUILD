@@ -81,12 +81,12 @@ _meson_mode='release'
 _meson_compile=()
 _meson_install=()
 
-if ((UPSTREAM)); then
+if ((_systemd_UPSTREAM)); then
   _meson_version="${pkgver}"
   _meson_mode='developer'
   makedepends+=('libarchive')
   optdepends_upstream=('libarchive: convert DDIs to tarballs')
-  if ((QUIET)); then
+  if ((_systemd_QUIET)); then
     _meson_install=('--quiet')
   else
     _meson_compile=('--verbose')
