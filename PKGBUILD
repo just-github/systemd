@@ -84,6 +84,7 @@ _meson_install=()
 if ((_systemd_UPSTREAM)); then
   _meson_version="${pkgver}"
   _meson_mode='developer'
+  pkgname+=('systemd-tests')
   makedepends+=('libarchive')
   optdepends_upstream=('libarchive: convert DDIs to tarballs')
   if ((_systemd_QUIET)); then
@@ -148,6 +149,7 @@ build() {
     -Dxenctrl=false
     -Dbpf-framework=true
     -Dima=false
+    -Dinstall-tests=true
     -Dlibidn2=true
     -Dlz4=true
     -Dman=true
@@ -269,6 +271,10 @@ package_systemd() {
   # files shipped with systemd-resolvconf
   rm "$pkgdir"/usr/{bin/resolvconf,share/man/man1/resolvconf.1}
 
+  # tests shipped with systemd-tests (for upstream)
+  install -d -m0755 systemd-tests/
+  mv "$pkgdir"/usr/lib/systemd/tests systemd-tests/
+
   # avoid a potential conflict with [core]/filesystem
   rm "$pkgdir"/usr/share/factory/etc/{issue,nsswitch.conf}
   sed -i -e '/^C \/etc\/nsswitch\.conf/d' \
@@ -338,6 +344,14 @@ package_systemd-sysvcompat() {
   for tool in halt poweroff reboot shutdown; do
     ln -s systemctl "$pkgdir"/usr/bin/$tool
   done
+}
+
+package_systemd-tests() {
+  pkgdesc='systemd tests'
+  depends=('systemd')
+
+  install -d -m0755 "$pkgdir"/usr/lib/systemd
+  mv systemd-tests/tests "$pkgdir"/usr/lib/systemd/tests
 }
 
 package_systemd-ukify() {
