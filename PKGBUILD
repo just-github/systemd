@@ -198,9 +198,10 @@ package_systemd() {
     'GPL-2.0-or-later' # udev
     'MIT-0' # documentation and config files
   )
-  depends=('acl' 'libacl.so' 'bash' 'cryptsetup' 'libcryptsetup.so' 'dbus'
+  depends=("systemd-libs=${pkgver}"
+           'acl' 'libacl.so' 'bash' 'cryptsetup' 'libcryptsetup.so' 'dbus'
            'dbus-units' 'kbd' 'kmod' 'libkmod.so' 'hwdata' 'libcap' 'libcap.so'
-           'libgcrypt' 'libxcrypt' 'libcrypt.so' 'systemd-libs' 'libidn2' 'lz4' 'pam'
+           'libgcrypt' 'libxcrypt' 'libcrypt.so' 'libidn2' 'lz4' 'pam'
            'libelf' 'libseccomp' 'libseccomp.so' 'util-linux' 'libblkid.so'
            'libmount.so' 'xz' 'pcre2' 'audit' 'libaudit.so'
            'openssl' 'libcrypto.so' 'libssl.so')
@@ -320,7 +321,7 @@ package_systemd-libs() {
 
 package_systemd-resolvconf() {
   pkgdesc='systemd resolvconf replacement (for use with systemd-resolved)'
-  depends=('systemd')
+  depends=("systemd=${pkgver}")
   provides=('openresolv' 'resolvconf')
   conflicts=('resolvconf')
 
@@ -334,7 +335,7 @@ package_systemd-resolvconf() {
 package_systemd-sysvcompat() {
   pkgdesc='sysvinit compat for systemd'
   conflicts=('sysvinit')
-  depends=('systemd')
+  depends=("systemd=${pkgver}")
 
   install -D -m0644 -t "$pkgdir"/usr/share/man/man8 \
     build/man/{halt,poweroff,reboot,shutdown}.8
@@ -348,7 +349,7 @@ package_systemd-sysvcompat() {
 
 package_systemd-tests() {
   pkgdesc='systemd tests'
-  depends=('systemd')
+  depends=("systemd=${pkgver}")
 
   install -d -m0755 "$pkgdir"/usr/lib/systemd
   mv systemd-tests/tests "$pkgdir"/usr/lib/systemd/tests
@@ -357,7 +358,7 @@ package_systemd-tests() {
 package_systemd-ukify() {
   pkgdesc='Combine kernel and initrd into a signed Unified Kernel Image'
   provides=('ukify')
-  depends=('binutils' 'python-cryptography' 'python-pefile' 'systemd')
+  depends=("systemd=${pkgver}" 'binutils' 'python-cryptography' 'python-pefile')
   optdepends=('python-pillow: Show the size of splash image'
               'sbsigntools: Sign the embedded kernel')
 
