@@ -135,9 +135,7 @@ build() {
 
   local _meson_options=(
     -Dversion-tag="${_meson_version}-arch"
-    # We use the version without dashes and tildes as the shared library
-    # tag because pacman looks at the shared library version.
-    -Dshared-lib-tag="${_meson_version/[-~]/}"
+    -Dshared-lib-tag="${_meson_version}"
     -Dmode="${_meson_mode}"
 
     -Dapparmor=false
