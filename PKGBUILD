@@ -15,7 +15,7 @@ _tag='255.6'
 # way or another. So we replace dashes and tildes with the empty string to
 # make sure pacman's version comparing does the right thing for rc versions:
 pkgver="${_tag/[-~]/}"
-pkgrel=3
+pkgrel=4
 arch=('x86_64')
 license=('LGPL-2.1-or-later')
 url='https://www.github.com/systemd/systemd'
@@ -91,6 +91,8 @@ if ((_systemd_UPSTREAM)); then
 fi
 
 _backports=(
+  # 99-systemd.rules: rework SYSTEMD_READY logic for device mapper
+  'c072860593329293e19580b337504adb52248462'
 )
 
 _reverts=(
