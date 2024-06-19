@@ -10,7 +10,7 @@ pkgname=('systemd'
          'systemd-resolvconf'
          'systemd-sysvcompat'
          'systemd-ukify')
-_tag='256'
+_tag='256.1'
 # Upstream versioning is incompatible with pacman's version comparisons, one
 # way or another. So we replace dashes and tildes with the empty string to
 # make sure pacman's version comparing does the right thing for rc versions:
@@ -52,7 +52,7 @@ source=("git+https://github.com/systemd/systemd#tag=v${_tag}?signed"
         '30-systemd-tmpfiles.hook'
         '30-systemd-udev-reload.hook'
         '30-systemd-update.hook')
-sha512sums=('0a82b5708d1025dbe12a722e3b7e946c5136a17ea2d9b73afba02da474873b3373cd7c1c4eff8bd612c2b16321f31a6109e3c34e548e48ae88fa5bb3fab00383'
+sha512sums=('1ba38dd45cd910c7a2b4c7f23f982c5b0e5b13cd5874571ebc9b609ff85c058cecdb61019141ef2010fd4882c3ffc5a13a2b0d6370db4067ad90c28b83de6760'
             '3ccf783c28f7a1c857120abac4002ca91ae1f92205dcd5a84aff515d57e706a3f9240d75a0a67cff5085716885e06e62597baa86897f298662ec36a940cf410e'
             '72dfd0e513e61f391d2b0bf8d9f13c6e2d2732dd7bd52413dccc791c562ab6265062c17d5abe60a42db0775e0b2352eba5e18d14fa2740c176d82edac4867c32'
             '363052706e8fdb040754d0bdc75377212865314ffb8718f8889e6c8a0049ea6cc442cb34fb9a204622eca597b78a547421867cb7517bd1b7342badee581bde7d'
