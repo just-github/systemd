@@ -71,12 +71,14 @@ sha512sums=('1ba38dd45cd910c7a2b4c7f23f982c5b0e5b13cd5874571ebc9b609ff85c058cecd
             '825b9dd0167c072ba62cabe0677e7cd20f2b4b850328022540f122689d8b25315005fa98ce867cf6e7460b2b26df16b88bb3b5c9ebf721746dce4e2271af7b97')
 
 _meson_version="${pkgver}-${pkgrel}"
+_meson_vcs_tag='false'
 _meson_mode='release'
 _meson_compile=()
 _meson_install=()
 
 if ((_systemd_UPSTREAM)); then
   _meson_version="${pkgver}"
+  _meson_vcs_tag='true'
   _meson_mode='developer'
   pkgname+=('systemd-tests')
   makedepends+=('libarchive')
@@ -130,6 +132,7 @@ build() {
 
   local _meson_options=(
     -Dversion-tag="${_meson_version}-arch"
+    -Dvcs-tag="${_meson_vcs_tag}"
     -Dshared-lib-tag="${_meson_version}"
     -Dmode="${_meson_mode}"
 
