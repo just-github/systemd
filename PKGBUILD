@@ -20,7 +20,7 @@ arch=('x86_64')
 license=('LGPL-2.1-or-later')
 url='https://www.github.com/systemd/systemd'
 makedepends=('acl' 'cryptsetup' 'docbook-xsl' 'gperf' 'lz4' 'xz' 'pam' 'libelf'
-             'intltool' 'iptables' 'kmod' 'libcap' 'libidn2' 'libgcrypt'
+             'intltool' 'iptables' 'kmod' 'libarchive' 'libcap' 'libidn2' 'libgcrypt'
              'libmicrohttpd' 'libxcrypt' 'libxslt' 'util-linux' 'linux-api-headers'
              'python-jinja' 'python-lxml' 'quota-tools' 'shadow' 'git'
              'meson' 'libseccomp' 'pcre2' 'audit' 'kexec-tools' 'libxkbcommon'
@@ -81,8 +81,6 @@ if ((_systemd_UPSTREAM)); then
   _meson_vcs_tag='true'
   _meson_mode='developer'
   pkgname+=('systemd-tests')
-  makedepends+=('libarchive')
-  optdepends_upstream=('libarchive: convert DDIs to tarballs')
   if ((_systemd_QUIET)); then
     _meson_install=('--quiet')
   else
@@ -209,12 +207,12 @@ package_systemd() {
               'gnutls: systemd-journal-gatewayd and systemd-journal-remote'
               'qrencode: show QR codes'
               'iptables: firewall features'
+              'libarchive: convert DDIs to tarballs'
               'libbpf: support BPF programs'
               'libpwquality: check password quality'
               'libfido2: unlocking LUKS2 volumes with FIDO2 token'
               'libp11-kit: support PKCS#11'
               'tpm2-tss: unlocking LUKS2 volumes with TPM2')
-  optdepends+=("${_optdepends_upstream[@]}")
   backup=(etc/pam.d/systemd-user
           etc/systemd/coredump.conf
           etc/systemd/homed.conf
