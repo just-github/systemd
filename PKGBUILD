@@ -290,6 +290,9 @@ package_systemd() {
 
   # overwrite the systemd-user PAM configuration with our own
   install -D -m0644 systemd-user.pam "$pkgdir"/etc/pam.d/systemd-user
+
+  # create a directory for cryptsetup keys
+  install -d -m0700 "$pkgdir"/etc/cryptsetup-keys.d
 }
 
 package_systemd-libs() {
