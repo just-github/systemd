@@ -293,6 +293,10 @@ package_systemd() {
 
   # create a directory for cryptsetup keys
   install -d -m0700 "$pkgdir"/etc/cryptsetup-keys.d
+
+  # handle uncommon license
+  install -d -m0755 "$pkgdir/usr/share/licenses/$pkgbase"
+  ln -s -t "$_" /usr/share/doc/systemd/LICENSES/MIT-0.txt
 }
 
 package_systemd-libs() {
