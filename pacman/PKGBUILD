@@ -54,7 +54,8 @@ _reverts=(
 )
 
 prepare() {
-  
+  cd "${pkgbase}"
+
   local _c _l
   for _c in "${_backports[@]}"; do
     if [[ "${_c}" == *..* ]]; then _l='--reverse'; else _l='--max-count=1'; fi
