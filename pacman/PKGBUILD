@@ -54,6 +54,11 @@ _reverts=(
 )
 
 prepare() {
+
+  ls -al; ls -al ../;
+  
+  echo $PWD;
+
   cd "${pkgbase}"
 
   local _c _l
@@ -236,6 +241,7 @@ package_systemd() {
   install -d -o root -g root -m 2755 "$pkgdir"/var/log/journal
 
   # add example bootctl configuration
+  echo $PWD; ls -al;
   install -D -m0644 manjaro.conf "$pkgdir"/usr/share/systemd/bootctl/manjaro.conf
   install -D -m0644 loader.conf "$pkgdir"/usr/share/systemd/bootctl/loader.conf
   install -D -m0644 splash-manjaro.bmp "$pkgdir"/usr/share/systemd/bootctl/splash-manjaro.bmp
