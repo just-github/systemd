@@ -45,7 +45,19 @@ jobs:
           su - builder -c "git clone https://github.com/${{ github.repository }}.git -b ${GITHUB_BRANCH} ${{ env.workdir }}/src/systemd"
           su - builder -c "cp ${{ env.workdir }}/src/systemd/pacman/* ${{ env.workdir}}/src"
           su - builder -c "cp ${{ env.workdir }}/src/systemd/pacman/* ${{ env.workdir}}"
-
+      - name: Sign
+        shell: bash
+        working-directory: ${{ env.workdir }}
+        run: |
+          if [ -z "${{ secrets.CALONG_GPG_PRI }}" ] || [ -z "${{ secrets.CALONG_GPG_PASSWD }}" ]; then
+              echo "## gpg credentials not provided. Skip signing."
+          else
+              cat <(echo -e "${{ secrets.CALONG_GPG_PRI }}" | base64 --decode) | gpg --batch --import &>/dev/null
+              for p in $(find $PWD -maxdepth 1 -regex '.*\.pkg\.tar\.\(xz\|zst\)'); do
+                echo "## signing $p"
+                gpg --pinentry-mode loopback --passphrase "${{ secrets.CALONG_GPG_PASSWD }}" --detach-sign ${p}
+              done
+          fi
       - name: Build
         shell: bash
         working-directory: ${{ env.workdir }}/src
@@ -56,4 +68,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: artifact
-          path: ${{ env.workdir }}/*.pkg.tar.zst
+          path: ${{ env.workdir }}/*.pkg.tar.*
