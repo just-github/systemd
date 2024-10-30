@@ -45,9 +45,16 @@ jobs:
           su - builder -c "git clone https://github.com/${{ github.repository }}.git -b ${GITHUB_BRANCH} ${{ env.workdir }}/src/systemd"
           su - builder -c "cp ${{ env.workdir }}/src/systemd/pacman/* ${{ env.workdir}}/src"
           su - builder -c "cp ${{ env.workdir }}/src/systemd/pacman/* ${{ env.workdir}}"
+          
+      - name: Build
+        shell: bash
+        working-directory: ${{ env.workdir }}/src
+        run: |
+          su - builder -c "echo "Y"| makepkg -s PKGBUILD"
+      
       - name: Sign
         shell: bash
-        working-directory: ${{ env.workdir }}
+        working-directory: ${{ env.workdir }}/src
         run: |
           if [ -z "${{ secrets.CALONG_GPG_PRI }}" ] || [ -z "${{ secrets.CALONG_GPG_PASSWD }}" ]; then
               echo "## gpg credentials not provided. Skip signing."
@@ -58,12 +65,7 @@ jobs:
                 gpg --pinentry-mode loopback --passphrase "${{ secrets.CALONG_GPG_PASSWD }}" --detach-sign ${p}
               done
           fi
-      - name: Build
-        shell: bash
-        working-directory: ${{ env.workdir }}/src
-        run: |
-          su - builder -c "echo "Y"| makepkg -s PKGBUILD"
-
+          
       - name: Upload packages
         uses: actions/upload-artifact@v4
         with:
